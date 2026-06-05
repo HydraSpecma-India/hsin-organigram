@@ -117,6 +117,144 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   width:16px;height:16px;border-radius:50%;border:1px solid;font-size:.42rem;
   background:#111;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;transition:.15s}
 .node-collapse-btn:hover{background:#FFD600;color:#111;border-color:#FFD600}
+.modal-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  border-radius: 8px;
+}
+.modal-avatar-preview {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: #15202b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #aaa;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.modal-avatar-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.modal-avatar-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.6rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: 0.15s;
+  text-align: center;
+}
+.modal-avatar-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.modal-avatar-btn.danger {
+  border-color: rgba(239, 83, 80, 0.4);
+  color: #ef9a9a;
+}
+.modal-avatar-btn.danger:hover {
+  background: rgba(239, 83, 80, 0.15);
+}
+.tv-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  color: #888;
+  cursor: pointer;
+  flex-shrink: 0;
+  background-color: #15202b;
+}
+.tv-avatar.empty {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+.node-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  text-align: left;
+}
+.node-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #15202b;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.node-avatar.empty {
+  border: 1.5px dashed rgba(255, 255, 255, 0.2);
+  color: #888;
+  font-size: 0.8rem;
+}
+.node:hover .node-avatar {
+  transform: scale(1.18) translateZ(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border-color: #ffcb05;
+}
+.node.dragging .node-avatar {
+  transform: scale(1.22) translateZ(20px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+  border-color: #ffcb05;
+}
+.node-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.node-info .role {
+  font-weight: 500;
+  font-size: .56rem;
+  opacity: .82;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.node-info .name {
+  font-weight: 700;
+  font-size: .64rem;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.node-info .count-badge {
+  font-size: .48rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .6);
+  margin-top: 1px;
+}
 .node.bc{background:#0a2545;border-color:#1565c0;color:#e3f0ff;--3d-color:#0d47a1;}
 .node.wc{background:#181828;border-color:#666;color:#eee;--3d-color:#424242;}
 .node.gc{background:#2e0e00;border-color:#e65100;color:#ffe0cc;--3d-color:#bf360c;}
@@ -478,6 +616,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 <div class="modal" onclick="event.stopPropagation()">
   <h3>✏️ Edit Node</h3>
   <div class="path-label" id="modalPath"></div>
+  <div class="modal-avatar-section">
+    <input type="file" id="modalAvatarFile" accept="image/*" style="display:none" onchange="handleModalAvatarUpload(event)">
+    <div id="modalAvatarPrev" class="modal-avatar-preview" onclick="document.getElementById('modalAvatarFile').click()" title="Click to upload photo">👤</div>
+    <div class="modal-avatar-btns">
+      <button class="modal-avatar-btn" onclick="document.getElementById('modalAvatarFile').click()">📤 Upload Photo</button>
+      <button class="modal-avatar-btn danger" onclick="removeModalAvatar()">🗑️ Remove</button>
+    </div>
+  </div>
   <label>Role / Title</label><input id="editRole" type="text">
   <label>Name</label><input id="editName" type="text">
   <label>Card Type</label>
@@ -766,8 +912,7 @@ const ADMIN_NODES = {
     "x": 1001.949951171875,
     "y": 258.9375,
     "mgr": "n12",
-    "line": "direct",
-    "avatar": "data:image/jpeg;base64,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"
+    "line": "direct"
   },
   "n13": {
     "id": "n13",
@@ -1683,11 +1828,16 @@ function render(){
       ${hasC?`<button class="nab tog" onclick="event.stopPropagation();toggleCollapse('${n.id}')">${collapsed.has(n.id)?'▶':'▼'}</button>`:''}
     </div>`;
     el.innerHTML=`${actHtml}
-      <span class="role">${esc(n.role)}</span>
-      <span class="name">${esc(n.name)}</span>
-      ${countStr}
-      ${n.dualMgr?'<span class="dual-badge">⇄ Dual</span>':''}
-      ${(!n.mgr&&n.id!=='n1'&&n.type!=='gc')?'<span class="nomgr-badge">👤 No Mgr</span>':''}`;
+      <div class="node-content">
+        ${n.avatar ? `<div class="node-avatar" style="background-image: url('${n.avatar}')"></div>` : `<div class="node-avatar empty">👤</div>`}
+        <div class="node-info">
+          <span class="role">${esc(n.role)}</span>
+          <span class="name">${esc(n.name)}</span>
+          ${countStr}
+          ${n.dualMgr?'<span class="dual-badge">⇄ Dual</span>':''}
+          ${(!n.mgr&&n.id!=='n1'&&n.type!=='gc')?'<span class="nomgr-badge">👤 No Mgr</span>':''}
+        </div>
+      </div>`;
     // collapse toggle btn at bottom (click the node name area)
     if(hasC){
       const ctb=document.createElement('div');
@@ -2242,12 +2392,104 @@ function doMove(newMgrId){
 }
 
 // ════════════════════════════════
-//  EDIT MODAL
+//  EDIT MODAL & AVATAR UPLOAD HELPERS
 // ════════════════════════════════
+let tempModalAvatarData = null;
+
+function resizeAndSetAvatar(file, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 120;
+      const MAX_HEIGHT = 120;
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      callback(dataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleModalAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  resizeAndSetAvatar(file, (dataUrl) => {
+    tempModalAvatarData = dataUrl;
+    const prev = document.getElementById('modalAvatarPrev');
+    if (prev) {
+      prev.style.backgroundImage = `url('${dataUrl}')`;
+      prev.textContent = '';
+    }
+  });
+}
+
+function removeModalAvatar() {
+  tempModalAvatarData = '';
+  const prev = document.getElementById('modalAvatarPrev');
+  if (prev) {
+    prev.style.backgroundImage = '';
+    prev.textContent = '👤';
+  }
+  const fileInput = document.getElementById('modalAvatarFile');
+  if (fileInput) fileInput.value = '';
+}
+
+function handleTableAvatarUpload(event, nodeId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  resizeAndSetAvatar(file, (dataUrl) => {
+    const n = nodes[nodeId];
+    if (n) {
+      n.avatar = dataUrl;
+      const prev = document.getElementById(`tvi-avatar-prev-${nodeId}`);
+      if (prev) {
+        prev.style.backgroundImage = `url('${dataUrl}')`;
+        prev.classList.remove('empty');
+        prev.textContent = '';
+      }
+      saveAll();
+      toast('Photo updated ✓');
+    }
+  });
+}
 function openEdit(id){
   if(isLocked){toast('🔒 Unlock to edit','err');return;}
   const n=nodes[id];if(!n)return;
   editingId=id;selMgrId=null;selMgr2Id=null;noMgrSel=false;
+  
+  tempModalAvatarData = n.avatar || null;
+  const avatarPrev = document.getElementById('modalAvatarPrev');
+  if (avatarPrev) {
+    if (n.avatar) {
+      avatarPrev.style.backgroundImage = `url('${n.avatar}')`;
+      avatarPrev.textContent = '';
+    } else {
+      avatarPrev.style.backgroundImage = '';
+      avatarPrev.textContent = '👤';
+    }
+  }
+  const fileInput = document.getElementById('modalAvatarFile');
+  if (fileInput) fileInput.value = '';
+
   document.getElementById('editRole').value=n.role;
   document.getElementById('editName').value=n.name;
   document.getElementById('editType').value=n.type;
@@ -2298,6 +2540,14 @@ function saveEdit(){
   if(hd&&selMgr2Id){n.dualMgr=selMgr2Id;n.dualLine=document.getElementById('dualLT').value;}
   else if(hd&&n.dualMgr){n.dualLine=document.getElementById('dualLT').value;}
   else if(!hd){delete n.dualMgr;delete n.dualLine;}
+  
+  if (tempModalAvatarData === '') {
+    delete n.avatar;
+  } else if (tempModalAvatarData) {
+    n.avatar = tempModalAvatarData;
+  }
+  
+  saveAll();
   closeModal();
   if(currentView==='chart')render();else renderTable();
   toast('Saved ✓');
@@ -2386,7 +2636,15 @@ function renderTable(){
       const mgrOpts=Object.values(nodes).filter(m=>m.id!==n.id).map(m=>`<option value="${m.id}"${n.mgr===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
       const dm2Opts='<option value="">— None</option>'+Object.values(nodes).filter(m=>m.id!==n.id).map(m=>`<option value="${m.id}"${n.dualMgr===m.id?' selected':''}>${esc(m.name)}</option>`).join('');
       const tr=document.createElement('tr');tr.style.background='rgba(255,214,0,.04)';
-      tr.innerHTML=`<td><input class="tvc-input" id="tvi-name" value="${esc(n.name)}"></td>
+      tr.innerHTML=`<td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="file" id="tvi-avatar-file-${n.id}" accept="image/*" style="display:none" onchange="handleTableAvatarUpload(event, '${n.id}')">
+          <div id="tvi-avatar-prev-${n.id}" class="tv-avatar ${n.avatar?'':'empty'}" style="${n.avatar ? `background-image: url('${n.avatar}')` : ''}" onclick="document.getElementById('tvi-avatar-file-${n.id}').click()" title="Click to upload image">
+            ${n.avatar ? '' : '👤'}
+          </div>
+          <input class="tvc-input" id="tvi-name" value="${esc(n.name)}">
+        </div>
+      </td>
         <td><input class="tvc-input" id="tvi-role" value="${esc(n.role)}"></td>
         <td><select class="tvc-select" id="tvi-type">
           <option value="wc"${n.type==='wc'?' selected':''}>White</option>
@@ -2405,7 +2663,10 @@ function renderTable(){
       const par=n.mgr?nodes[n.mgr]:null;const dm=n.dualMgr?nodes[n.dualMgr]:null;const isNm=!n.mgr&&n.id!=='n1'&&n.type!=='gc';
       const childC=Object.values(nodes).filter(x=>x.mgr===n.id).length;
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td style="font-weight:600">${esc(n.name)}${childC?` <span style="font-size:.6rem;color:#888;font-weight:400">(${childC} direct)</span>`:''}</td>
+      tr.innerHTML=`<td style="font-weight:600;display:flex;align-items:center;gap:6px">
+        ${n.avatar ? `<div class="tv-avatar" style="background-image: url('${n.avatar}')"></div>` : `<div class="tv-avatar empty">👤</div>`}
+        <span>${esc(n.name)}${childC?` <span style="font-size:.6rem;color:#888;font-weight:400">(${childC} direct)</span>`:''}</span>
+      </td>
         <td style="color:#bbb">${esc(n.role)}</td>
         <td><span class="tv-badge ${isNm?'nomgr':n.type}">${isNm?'No Mgr':typeLabel[n.type]||n.type}</span></td>
         <td style="color:#999">${par?esc(par.name):(n.type==='gc'?'':'<span style="color:#9c27b0">— Unassigned</span>')}</td>
@@ -2453,6 +2714,7 @@ function tvSave(id){
   n.mgr=document.getElementById('tvi-mgr').value||null;
   const dm=document.getElementById('tvi-dual').value;
   if(dm)n.dualMgr=dm;else{delete n.dualMgr;delete n.dualLine;}
+  saveAll();
   tvEditingId=null;renderTable();toast('Saved ✓');
 }
 function tvDel(id){
