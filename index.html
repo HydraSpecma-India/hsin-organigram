@@ -149,20 +149,52 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   color:rgba(255,214,0,.45);writing-mode:vertical-rl;text-orientation:mixed;
   transform:rotate(180deg);pointer-events:none;z-index:5;
   padding:8px 0;
-}
-.side-panel{position:absolute;top:16px;right:16px;background:rgba(30,18,0,.88);border:1.5px solid #c9a800;
-  border-radius:11px;padding:11px 13px;min-width:200px;max-width:215px;backdrop-filter:blur(10px);z-index:50;
-  animation:slideR .4s cubic-bezier(.34,1.56,.64,1) both;}
+}.side-panel{position:absolute;top:16px;right:16px;background:rgba(12,20,30,.92);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:11px;padding:11px 13px;min-width:220px;max-width:240px;backdrop-filter:blur(10px);z-index:50;
+  animation:slideR .4s cubic-bezier(.34,1.56,.64,1) both;box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
 @keyframes slideR{0%{opacity:0;transform:translateX(28px)}100%{opacity:1;transform:none}}
-.side-panel h4{font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FFD600;margin-bottom:7px;display:flex;align-items:center;gap:5px}
-.gcard{background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.18);border-radius:7px;padding:6px 8px;
-  margin-bottom:4px;font-size:.64rem;cursor:pointer;transition:.14s;}
-.gcard:hover{background:rgba(255,214,0,.12);transform:translateX(-2px)}
-.gcard .gc-name{font-weight:700;color:#FFD600;display:block}
-.gcard .gc-role{color:#888;font-size:.59rem;display:block;margin-top:1px}
-.gcard-badge{display:inline-block;font-size:.52rem;padding:1px 5px;border-radius:7px;margin-top:2px;font-weight:600}
-.gcard-badge.gs{background:rgba(255,214,0,.18);color:#FFD600;border:1px solid #c9a800}
-.gcard-badge.gc{background:rgba(230,81,0,.18);color:#ffab91;border:1px solid #e65100}
+.side-panel h4{font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.side-tabs {display:flex;gap:3px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:2px}
+.dir-select {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.63rem;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  outline: none;
+  font-family: var(--font);
+}
+.dir-select option {
+  background: #0c141e;
+  color: #fff;
+}
+.side-tab {flex:1;background:transparent;border:none;color:#aaa;font-size:0.58rem;font-weight:600;padding:4px 2px;border-radius:4px;cursor:pointer;transition:.15s;text-align:center;font-family:var(--font)}
+.side-tab.active {background:#FFD600;color:#111}
+.side-tab:hover:not(.active) {background:rgba(255,255,255,.08);color:#fff}
+.gcard{border-radius:7px;padding:6px 8px;margin-bottom:5px;font-size:.64rem;cursor:pointer;transition:.15s;border:1.5px solid;text-align:left}
+.gcard:hover{transform:translateX(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.gcard.bc{background:rgba(21,101,192,0.08);border-color:rgba(21,101,192,0.22);color:#e3f0ff}
+.gcard.bc:hover{background:rgba(21,101,192,0.18);border-color:#1565c0}
+.gcard.wc{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.12);color:#eee}
+.gcard.wc:hover{background:rgba(255,255,255,0.07);border-color:#888}
+.gcard.gs{background:rgba(255,214,0,0.04);border-color:rgba(255,214,0,0.18);color:#FFD600}
+.gcard.gs:hover{background:rgba(255,214,0,0.12);border-color:#FFD600}
+.gcard.cl{background:rgba(255,255,255,0.01);border-color:rgba(255,255,255,0.08);color:#aaa;border-style:dashed}
+.gcard.cl:hover{background:rgba(255,255,255,0.05);border-color:#555}
+.gcard .gc-name{font-weight:700;display:block}
+.gcard.gs .gc-name{color:#FFD600}
+.gcard.bc .gc-name{color:#64b5f6}
+.gcard.wc .gc-name{color:#fff}
+.gcard.cl .gc-name{color:#ccc}
+.gcard .gc-role{color:#888;font-size:.59rem;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard-badge{display:inline-block;font-size:.48rem;padding:1px 5px;border-radius:4px;margin-top:4px;font-weight:600}
+.gcard-badge.gs{background:rgba(255,214,0,.15);color:#FFD600;border:1px solid #c9a800}
+.gcard-badge.wc{background:rgba(255,255,255,.08);color:#eee;border:1px solid #888}
+.gcard-badge.bc{background:rgba(21,101,192,.18);color:#64b5f6;border:1px solid #1565c0}
+.gcard-badge.cl{background:rgba(255,255,255,.04);color:#aaa;border:1px dashed #555}
 .nm-panel{position:absolute;top:16px;right:240px;background:rgba(26,10,42,.88);border:1.5px dashed #9c27b0;
   border-radius:11px;padding:11px 13px;min-width:200px;backdrop-filter:blur(10px);z-index:50;
   animation:slideR .45s cubic-bezier(.34,1.56,.64,1) both;}
@@ -262,14 +294,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 /* CONNECTION HIGHLIGHTS */
 .highlight-line {
-  stroke: #ffeb3b !important;
-  stroke-width: 4.5px !important;
-  filter: drop-shadow(0 3px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(255, 235, 95, 0.85));
+  stroke: #ffff00 !important;
+  stroke-width: 5.5px !important;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,0.7)) drop-shadow(0 0 8px rgba(255, 255, 0, 0.95)) drop-shadow(0 0 18px rgba(255, 255, 0, 0.8));
   z-index: 100 !important;
 }
 .highlight-arrow {
-  fill: #ffeb3b !important;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 4px rgba(255, 235, 95, 0.8));
+  fill: #ffff00 !important;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.7)) drop-shadow(0 0 6px rgba(255, 255, 0, 0.9));
   animation: arrowFadeIn 0.2s ease-out both;
   animation-delay: 0.25s;
 }
@@ -278,16 +310,36 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   to { opacity: 1; }
 }
 .node.highlight-child {
-  box-shadow: 0 6px 0 #FFD600, 0 10px 24px rgba(255, 214, 0, 0.45), inset 0 1px 1px rgba(255,255,255,0.3) !important;
-  border-color: #FFD600 !important;
+  box-shadow: 0 6px 0 #FFD600, 0 0 25px rgba(255, 214, 0, 0.85), inset 0 1px 1px rgba(255,255,255,0.4) !important;
+  border: 2.5px solid #FFD600 !important;
   transform: translateY(-6px) scale(1.025);
   z-index: 200 !important;
 }
 .node.highlight-parent {
-  box-shadow: 0 5px 0 #2196f3, 0 8px 18px rgba(33, 150, 243, 0.35), inset 0 1px 1px rgba(255,255,255,0.2) !important;
-  border-color: #2196f3 !important;
+  box-shadow: 0 5px 0 #00e5ff, 0 0 25px rgba(0, 229, 255, 0.85), inset 0 1px 1px rgba(255,255,255,0.3) !important;
+  border: 2.5px solid #00e5ff !important;
   transform: translateY(-4px);
   z-index: 190 !important;
+}
+.node.highlight-category.gs {
+  outline: 3px solid #ffd600;
+  outline-offset: 3px;
+  box-shadow: 0 0 15px rgba(255, 214, 0, 0.75) !important;
+}
+.node.highlight-category.wc {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.75) !important;
+}
+.node.highlight-category.bc {
+  outline: 3px solid #00b0ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 15px rgba(0, 176, 255, 0.75) !important;
+}
+.node.highlight-category.cl {
+  outline: 3px solid #d500f9;
+  outline-offset: 3px;
+  box-shadow: 0 0 15px rgba(213, 0, 249, 0.75) !important;
 }
 
 /* TOAST */
@@ -366,7 +418,24 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <svg id="connSvg"></svg>
     <div class="global-col-divider"></div>
     <div class="global-col-label">Global Team</div>
-    <div class="side-panel" id="globalPanel"><h4>🌍 Global Staff</h4><div id="globalList"></div></div>
+    <div class="side-panel" id="globalPanel" style="min-width: 220px;">
+      <h4>👥 Directory</h4>
+      <div class="side-tabs">
+        <button class="side-tab active" id="tab-gs" onclick="switchDirectoryTab('gs')">Global</button>
+        <button class="side-tab" id="tab-wc" onclick="switchDirectoryTab('wc')">White</button>
+        <button class="side-tab" id="tab-bc" onclick="switchDirectoryTab('bc')">Blue</button>
+        <button class="side-tab" id="tab-cl" onclick="switchDirectoryTab('cl')">Contract</button>
+      </div>
+      <select id="dirManagerFilter" class="dir-select" onchange="onDirManagerChange()">
+        <option value="all">🔍 Filter by Manager: All</option>
+      </select>
+      <div class="highlight-mode-toggle" style="margin-bottom: 0;">
+        <div class="side-tabs" style="margin-bottom: 0;">
+          <button class="side-tab active" id="hl-mode-mgr" onclick="setHighlightMode('manager')" style="font-size: 0.53rem; padding: 3px 0;" title="Click employee to highlight manager">Show Manager</button>
+          <button class="side-tab" id="hl-mode-rep" onclick="setHighlightMode('reports')" style="font-size: 0.53rem; padding: 3px 0;" title="Click manager to highlight reports">Show Reports</button>
+        </div>
+      </div>
+    </div>
     <div class="nm-panel" id="nmPanel" style="display:none"><h4>👤 No Manager</h4><div id="nmList"></div></div>
   </div>
 </div>
@@ -1583,6 +1652,7 @@ function nodeClass(n){
   return n.type;
 }
 function render(){
+  pinnedNodeId = null;
   clearHighlights();
   const wrap=document.getElementById('canvasWrap');
   [...wrap.querySelectorAll('.node')].forEach(el=>el.remove());
@@ -1594,7 +1664,7 @@ function render(){
     if(!isVisible(n.id))return;
     const el=document.createElement('div');
     const nc=nodeClass(n);
-    el.className='node '+nc+(isLocked?' locked-mode':'');
+    el.className='node '+nc+' '+n.type+(isLocked?' locked-mode':'');
     el.id='nd_'+n.id; el.dataset.id=n.id;
     el.style.left=n.x+'px'; el.style.top=n.y+'px';
     el.style.animationDelay=(delay*0.022)+'s'; delay++;
@@ -1632,10 +1702,10 @@ function render(){
     }
     // Connection highlights on hover and click
     el.addEventListener('mouseenter', () => {
-      if (!highlightedNodeId) highlightConnection(n.id);
+      if (!pinnedNodeId) highlightConnection(n.id);
     });
     el.addEventListener('mouseleave', () => {
-      if (highlightedNodeId === n.id) clearHighlights();
+      if (!pinnedNodeId) clearHighlights();
     });
     el.addEventListener('click', e => {
       e.stopPropagation();
@@ -1643,9 +1713,11 @@ function render(){
         if (n.id !== moveSourceId) doMove(n.id);
         return;
       }
-      if (highlightedNodeId === n.id) {
+      if (pinnedNodeId === n.id) {
+        pinnedNodeId = null;
         clearHighlights();
       } else {
+        pinnedNodeId = n.id;
         highlightConnection(n.id);
       }
     });
@@ -1805,15 +1877,87 @@ function drawConnectors(){
   });
 }
 function drawLine(svg,fN,tN,lt,isDual){}
-function updateGlobalPanel(){
-  const list=document.getElementById('globalList');if(!list)return;list.innerHTML='';
-  Object.values(nodes).filter(n=>n.type==='gs').forEach(n=>{
-    const d=document.createElement('div');d.className='gcard';
-    d.innerHTML=`<span class="gc-name">${esc(n.name)}</span><span class="gc-role">${esc(n.role)}</span><span class="gcard-badge ${n.type}">Global Staff</span>`;
-    if(!isLocked)d.onclick=()=>openEdit(n.id);
-    list.appendChild(d);
+let currentDirectoryTab = 'gs';
+function switchDirectoryTab(tab) {
+  currentDirectoryTab = tab;
+  ['gs', 'wc', 'bc', 'cl'].forEach(t => {
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  updateGlobalPanel();
+}
+let lastManagersHash = '';
+function populateDirectoryManagerFilter() {
+  const select = document.getElementById('dirManagerFilter');
+  if (!select) return;
+  
+  const managerIds = new Set();
+  Object.values(nodes).forEach(n => {
+    if (n.mgr) managerIds.add(n.mgr);
+    if (n.dualMgr) managerIds.add(n.dualMgr);
+  });
+  
+  const managerNodes = Array.from(managerIds)
+    .map(id => nodes[id])
+    .filter(n => n && n.name);
+  
+  managerNodes.sort((a, b) => a.name.localeCompare(b.name));
+  
+  const currentHash = managerNodes.map(m => `${m.id}:${m.name}`).join('|');
+  if (currentHash === lastManagersHash) {
+    return;
+  }
+  lastManagersHash = currentHash;
+  
+  const currentVal = select.value;
+  select.innerHTML = '<option value="all">🔍 Filter by Manager: All</option>';
+  managerNodes.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    select.appendChild(opt);
+  });
+  
+  if (Array.from(select.options).some(o => o.value === currentVal)) {
+    select.value = currentVal;
+  } else {
+    select.value = 'all';
+  }
+}
+
+function updateCategoryHighlights() {
+  document.querySelectorAll('.highlight-category').forEach(el => el.classList.remove('highlight-category'));
+  const tab = currentDirectoryTab;
+  Object.values(nodes).forEach(n => {
+    if (n.type === tab) {
+      const el = document.getElementById('nd_' + n.id);
+      if (el) el.classList.add('highlight-category');
+    }
   });
 }
+
+function onDirManagerChange() {
+  const select = document.getElementById('dirManagerFilter');
+  if (!select) return;
+  const val = select.value;
+  if (val === 'all') {
+    pinnedNodeId = null;
+    clearHighlights();
+  } else {
+    pinnedNodeId = val;
+    highlightConnection(val);
+    const card = document.getElementById('nd_' + val);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+  }
+}
+
+function updateGlobalPanel(){
+  populateDirectoryManagerFilter();
+  updateCategoryHighlights();
+}
+
 function updateNmPanel(){
   const list=document.getElementById('nmList');if(!list)return;list.innerHTML='';
   const nm=Object.values(nodes).filter(n=>!n.mgr&&n.id!=='n1'&&n.type!=='gc');
@@ -1828,22 +1972,59 @@ function updateNmPanel(){
 function toggleNmPanel(){noMgrPanelVisible=!noMgrPanelVisible;document.getElementById('nmPanel').style.display=noMgrPanelVisible?'block':'none';}
 
 let highlightedNodeId = null;
+let pinnedNodeId = null;
+let directoryHighlightMode = 'manager';
+
+function setHighlightMode(mode) {
+  directoryHighlightMode = mode;
+  ['hl-mode-mgr', 'hl-mode-rep'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('active', (id === 'hl-mode-mgr' && mode === 'manager') || (id === 'hl-mode-rep' && mode === 'reports'));
+  });
+  if (pinnedNodeId) {
+    highlightConnection(pinnedNodeId);
+  } else if (highlightedNodeId) {
+    highlightConnection(highlightedNodeId);
+  }
+}
+
 function highlightConnection(nodeId) {
   clearHighlights();
   highlightedNodeId = nodeId;
   if(!nodeId)return;
   const n=nodes[nodeId];if(!n)return;
-  const childCard=document.getElementById('nd_'+nodeId);
-  if(childCard)childCard.classList.add('highlight-child');
-  if(n.mgr){
-    const mgrCard=document.getElementById('nd_'+n.mgr);
-    if(mgrCard)mgrCard.classList.add('highlight-parent');
-    drawHighlightPath(nodeId, n.mgr, false);
-  }
-  if(n.dualMgr){
-    const dmCard=document.getElementById('nd_'+n.dualMgr);
-    if(dmCard)dmCard.classList.add('highlight-parent');
-    drawHighlightPath(nodeId, n.dualMgr, true);
+  
+  if (directoryHighlightMode === 'reports') {
+    const managerCard = document.getElementById('nd_' + nodeId);
+    if (managerCard) managerCard.classList.add('highlight-parent');
+    
+    const directChildren = Object.values(nodes).filter(ch => ch.mgr === nodeId);
+    const dualChildren = Object.values(nodes).filter(ch => ch.dualMgr === nodeId);
+    
+    directChildren.forEach(ch => {
+      const chCard = document.getElementById('nd_' + ch.id);
+      if (chCard) chCard.classList.add('highlight-child');
+      drawHighlightPath(ch.id, nodeId, false);
+    });
+    
+    dualChildren.forEach(ch => {
+      const chCard = document.getElementById('nd_' + ch.id);
+      if (chCard) chCard.classList.add('highlight-child');
+      drawHighlightPath(ch.id, nodeId, true);
+    });
+  } else {
+    const childCard = document.getElementById('nd_' + nodeId);
+    if (childCard) childCard.classList.add('highlight-child');
+    if (n.mgr) {
+      const mgrCard = document.getElementById('nd_' + n.mgr);
+      if (mgrCard) mgrCard.classList.add('highlight-parent');
+      drawHighlightPath(nodeId, n.mgr, false);
+    }
+    if (n.dualMgr) {
+      const dmCard = document.getElementById('nd_' + n.dualMgr);
+      if (dmCard) dmCard.classList.add('highlight-parent');
+      drawHighlightPath(nodeId, n.dualMgr, true);
+    }
   }
 }
 function drawHighlightPath(chId, parId, isDual = false) {
@@ -1931,7 +2112,10 @@ function clearHighlights(){
   document.querySelectorAll('.highlight-parent').forEach(el=>el.classList.remove('highlight-parent'));
   document.querySelectorAll('.dynamic-highlight').forEach(el=>el.remove());
 }
-document.addEventListener('click',()=>clearHighlights());
+document.addEventListener('click',()=>{
+  pinnedNodeId = null;
+  clearHighlights();
+});
 
 // ════════════════════════════════
 //  DRAG & DROP
