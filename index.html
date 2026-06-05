@@ -130,7 +130,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .conn-line{stroke-width:2.5;fill:none}
 .conn-line.direct{stroke:#1565c0} .conn-line.dotted{stroke:#e65100;stroke-dasharray:6 4}
 
-/* global/nomgr panels */
+/* Left global column divider */
+.global-col-divider{
+  position:absolute;left:196px;top:0;bottom:0;
+  width:2px;background:linear-gradient(to bottom,rgba(255,214,0,.5),rgba(255,214,0,.08));
+  pointer-events:none;z-index:5;
+}
+.global-col-label{
+  position:absolute;left:4px;top:0;
+  font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,214,0,.45);writing-mode:vertical-rl;text-orientation:mixed;
+  transform:rotate(180deg);pointer-events:none;z-index:5;
+  padding:8px 0;
+}
 .side-panel{position:absolute;top:16px;right:16px;background:rgba(30,18,0,.88);border:1.5px solid #c9a800;
   border-radius:11px;padding:11px 13px;min-width:200px;max-width:215px;backdrop-filter:blur(10px);z-index:50;
   animation:slideR .4s cubic-bezier(.34,1.56,.64,1) both;}
@@ -291,8 +303,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <button class="abtn red" onclick="collapseAll()">⊟ Collapse All</button>
     <button class="abtn yellow" id="btnAdd" onclick="openAddModal()">＋ Add</button>
     <button class="abtn purple" onclick="toggleNmPanel()">👤 No Mgr</button>
+    <button class="abtn" style="border-color:#26c6da;color:#80deea" id="btnSaveLayout" onclick="saveAdminLayout()">💾 Save Layout</button>
+    <button class="abtn" style="border-color:#ef5350;color:#ef9a9a" id="btnReset" onclick="resetToDefault()">↺ Reset Layout</button>
     <button class="abtn teal" id="btnExport" onclick="exportExcel()">📥 Export Excel</button>
     <button class="abtn teal" id="btnImport" onclick="document.getElementById('importFile').click()">📤 Import Excel</button>
+    <button class="abtn" style="border-color:#6e40c9;color:#b39ddb" id="btnGhPush" onclick="openGithubModal()">⬆ Push to GitHub</button>
     <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(event)">
   </div>
   <div class="pills">
@@ -310,7 +325,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 <div class="chart-view active" id="chartView">
   <div class="canvas-wrap" id="canvasWrap">
     <svg id="connSvg"></svg>
-    <div class="side-panel" id="globalPanel"><h4>🌐 Global Team</h4><div id="globalList"></div></div>
+    <div class="global-col-divider"></div>
+    <div class="global-col-label">Global Team</div>
     <div class="nm-panel" id="nmPanel" style="display:none"><h4>👤 No Manager</h4><div id="nmList"></div></div>
   </div>
 </div>
@@ -428,7 +444,47 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
 </div></div>
 
-<!-- IMPORT PREVIEW MODAL -->
+<!-- GITHUB PUSH MODAL -->
+<div class="modal-overlay" id="githubModal" style="display:none" onclick="if(event.target===this)closeGithubModal()">
+<div class="modal" style="width:440px;max-width:96vw" onclick="event.stopPropagation()">
+  <h3>⬆ Push to GitHub</h3>
+  <div style="font-size:.71rem;color:#aaa;margin-bottom:14px;line-height:1.6;background:rgba(255,255,255,.04);border-radius:6px;padding:9px 12px">
+    This <strong style="color:#FFD600">bakes your current data directly into the HTML file on GitHub</strong>.<br>
+    All users opening the GitHub Pages link will immediately see your latest changes.
+  </div>
+  <label>GitHub Username</label>
+  <input id="ghUser" type="text" placeholder="e.g. hydraspecma-hsin" autocomplete="off">
+  <label>Repository Name</label>
+  <input id="ghRepo" type="text" placeholder="e.g. hsin-organigram" autocomplete="off">
+  <label>File name in repo</label>
+  <input id="ghFile" type="text" placeholder="index.html" value="index.html">
+  <label>Branch</label>
+  <input id="ghBranch" type="text" placeholder="main" value="main">
+  <label>Personal Access Token (PAT)
+    <a href="https://github.com/settings/tokens/new?scopes=repo&description=HSIN+Organigram" target="_blank"
+       style="font-size:.62rem;color:#64b5f6;margin-left:6px;text-decoration:none">📎 Generate here ↗</a>
+  </label>
+  <input id="ghToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+  <div style="font-size:.65rem;color:#666;margin-top:-7px;margin-bottom:10px">
+    Token needs <strong style="color:#aaa">repo</strong> scope. Stored in your browser only.
+  </div>
+  <div id="ghStatus" style="font-size:.72rem;min-height:18px;margin-bottom:8px;padding:6px 10px;border-radius:6px;display:none;white-space:pre-line"></div>
+  <div class="modal-btns">
+    <button class="mbtn save" id="ghPushBtn" onclick="pushToGithub()">⬆ Push Now</button>
+    <button class="mbtn" style="background:rgba(255,255,255,.08);color:#ccc;flex:0;padding:7px 14px" onclick="saveGhConfig()">💾 Save Config</button>
+    <button class="mbtn cancel" onclick="closeGithubModal()">Cancel</button>
+  </div>
+  <div style="margin-top:14px;padding:10px 12px;background:rgba(255,214,0,.04);border:1px solid rgba(255,214,0,.12);border-radius:7px;font-size:.67rem;color:#aaa;line-height:1.8">
+    <strong style="color:#FFD600">📋 First-time setup:</strong><br>
+    1. github.com → New repo → <strong style="color:#ccc">hsin-organigram</strong> (Public)<br>
+    2. Upload this file as <strong style="color:#ccc">index.html</strong><br>
+    3. Settings → Pages → Deploy from main<br>
+    4. Generate PAT at link above → paste here<br>
+    5. Click Push Now — done ✅
+  </div>
+</div></div>
+
+
 <div class="modal-overlay" id="importModal" style="display:none" onclick="if(event.target===this)closeImportModal()">
 <div class="modal" style="width:500px;max-width:96vw" onclick="event.stopPropagation()">
   <h3>📤 Import Preview</h3>
@@ -454,77 +510,298 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 //  ADMIN DATA (master copy — never mutated by locked users)
 // ════════════════════════════════
 const ADMIN_NODES = {
-  n1:  {id:'n1', role:'Head of Operations',            name:'Simon Steen Kristensen', type:'gs',x:620, y:30,  mgr:null, line:'direct'},
-  n2:  {id:'n2', role:'Procurement Global Head',       name:'Christian Evers',        type:'gc',x:80,  y:200, mgr:'n1', line:'dotted'},
-  n7:  {id:'n7', role:'Customer Service Global Head',  name:'Brian Vind Jensen',      type:'gc',x:310, y:200, mgr:'n1', line:'dotted'},
-  n63: {id:'n63',role:'Quality Global Head',           name:'Robert Kaleta',          type:'gc',x:900, y:200, mgr:'n1', line:'dotted'},
-  n64: {id:'n64',role:'Finance Global Head',           name:'Thomas Aarup Christensen',type:'gc',x:1090,y:200,mgr:'n1', line:'dotted'},
-  n12: {id:'n12',role:'Country Manager — India',       name:'Babu Parthasarathy',     type:'wc',x:620, y:200, mgr:'n1', line:'direct'},
-  n3:  {id:'n3', role:'Procurement Lead',              name:'Prabhu',                 type:'wc',x:80,  y:395, mgr:'n12',line:'direct',dualMgr:'n2',dualLine:'dotted'},
-  n8:  {id:'n8', role:'Customer Service',              name:'Dinesh Kumar Singh',     type:'wc',x:310, y:395, mgr:'n12',line:'direct',dualMgr:'n7',dualLine:'dotted'},
-  n60: {id:'n60',role:'Financial Controller',          name:'Balaji Jayaram',         type:'wc',x:930, y:395, mgr:'n12',line:'direct',dualMgr:'n64',dualLine:'dotted'},
-  n4:  {id:'n4', role:'Senior Engineer Purchase',      name:'Dharani Kumar',          type:'wc',x:10,  y:560, mgr:'n3', line:'direct'},
-  n5:  {id:'n5', role:'Asst Manager (NPD)',            name:'Vignesh',                type:'wc',x:175, y:560, mgr:'n3', line:'direct'},
-  n6:  {id:'n6', role:'Asst Manager Sourcing & VD',   name:'Prakash',                type:'wc',x:340, y:560, mgr:'n3', line:'direct'},
-  n9:  {id:'n9', role:'Sales Coordinator',             name:'Janki Basu',             type:'wc',x:270, y:560, mgr:'n8', line:'direct'},
-  n10: {id:'n10',role:'Sales',                         name:'Lokesh / Trainee',       type:'bc',x:270, y:710, mgr:'n9', line:'direct'},
-  n11: {id:'n11',role:'Office Asst Admin',             name:'Ms. Usha',               type:'wc',x:435, y:560, mgr:'n8', line:'direct'},
-  n21: {id:'n21',role:'People & Culture',              name:'Suresh Kumar',           type:'wc',x:505, y:395, mgr:'n12',line:'direct'},
-  n22: {id:'n22',role:'Dynamic App Specialist – IT',  name:'Manigandan',             type:'wc',x:650, y:395, mgr:'n12',line:'direct'},
-  n23: {id:'n23',role:'Operations Manager & QEHS',    name:'Kumaran',                type:'wc',x:780, y:395, mgr:'n12',line:'direct'},
-  n24: {id:'n24',role:'Warehouse Engineer',            name:'Perumal',                type:'wc',x:620, y:560, mgr:'n23',line:'direct'},
-  n25: {id:'n25',role:'Asst Manager Quality',         name:'Arun Bharadwaj',         type:'wc',x:785, y:560, mgr:'n23',line:'direct'},
-  n26: {id:'n26',role:'Deputy Manager SQD',           name:'Surya Vaman',            type:'wc',x:720, y:710, mgr:'n25',line:'direct'},
-  n27: {id:'n27',role:'Sr Quality Engineer',          name:'Peer Ali',               type:'wc',x:720, y:860, mgr:'n26',line:'direct'},
-  n28: {id:'n28',role:'Junior Technician',            name:'Sivagami',               type:'bc',x:720, y:1010,mgr:'n27',line:'direct'},
-  n29: {id:'n29',role:'Fork Lift Operator',           name:'Contract Labour',        type:'cl',x:880, y:710, mgr:'n25',line:'direct'},
-  n30: {id:'n30',role:'Senior Quality Engineer',      name:'Arun Raja',              type:'wc',x:1040,y:710, mgr:'n25',line:'direct'},
-  n31: {id:'n31',role:'Quality Engineer',             name:'Venkatesan Annamalai',   type:'wc',x:1040,y:860, mgr:'n30',line:'direct'},
-  n32: {id:'n32',role:'Jr Quality Engineer',          name:'Srinivasan',             type:'wc',x:1040,y:1010,mgr:'n31',line:'direct'},
-  n33: {id:'n33',role:'Fork Lift Operator',           name:'Contract QL',            type:'cl',x:1200,y:860, mgr:'n30',line:'direct'},
-  n34: {id:'n34',role:'Logistics – Asst Manager',    name:'Rajesh Kumar',           type:'wc',x:950, y:560, mgr:'n23',line:'direct'},
-  n35: {id:'n35',role:'Prod Eng',                     name:'Yuvaraj Gopala Krishnan',type:'wc',x:950, y:710, mgr:'n34',line:'direct'},
-  n36: {id:'n36',role:'Senior Technician',            name:'Elangovan',              type:'bc',x:950, y:860, mgr:'n35',line:'direct'},
-  n37: {id:'n37',role:'Prod Tech',                    name:'Tamil Selvan',           type:'bc',x:950, y:1010,mgr:'n36',line:'direct'},
-  n38: {id:'n38',role:'Prod Tech',                    name:'Vignesh',                type:'bc',x:950, y:1160,mgr:'n37',line:'direct'},
-  n39: {id:'n39',role:'Junior Technician',            name:'Mohammed Rafiq',         type:'bc',x:950, y:1310,mgr:'n38',line:'direct'},
-  n40: {id:'n40',role:'Junior Technician',            name:'Ms. Selvi',              type:'bc',x:950, y:1460,mgr:'n39',line:'direct'},
-  n41: {id:'n41',role:'Diploma Trainee',              name:'Prasanth',               type:'bc',x:950, y:1610,mgr:'n40',line:'direct'},
-  n42: {id:'n42',role:'Contract Labour',              name:'Sathishkumar',           type:'cl',x:950, y:1760,mgr:'n41',line:'direct'},
-  n43: {id:'n43',role:'Contract Labour',              name:'Vinoth',                 type:'cl',x:950, y:1910,mgr:'n42',line:'direct'},
-  n44: {id:'n44',role:'Contract Labour',              name:'Karusiyappan',           type:'cl',x:950, y:2060,mgr:'n43',line:'direct'},
-  n45: {id:'n45',role:'Contract Labour',              name:'Anandhan',               type:'cl',x:950, y:2210,mgr:'n44',line:'direct'},
-  n46: {id:'n46',role:'Production Manager',           name:'Mohan Srinivasan',       type:'wc',x:1110,y:560, mgr:'n23',line:'direct'},
-  n47: {id:'n47',role:'Prod & Maint Incharge',       name:'Shivashankar',           type:'wc',x:1110,y:710, mgr:'n46',line:'direct'},
-  n48: {id:'n48',role:'Senior Technician',            name:'Prakash',                type:'bc',x:1110,y:860, mgr:'n47',line:'direct'},
-  n49: {id:'n49',role:'Senior Technician',            name:'Kumareson',              type:'bc',x:1110,y:1010,mgr:'n48',line:'direct'},
-  n50: {id:'n50',role:'Technician',                   name:'A Sathish',              type:'bc',x:1110,y:1160,mgr:'n49',line:'direct'},
-  n51: {id:'n51',role:'Maint Technician',             name:'Suresh Umapathy',        type:'bc',x:1110,y:1310,mgr:'n50',line:'direct'},
-  n52: {id:'n52',role:'Technician',                   name:'Sivalincar',             type:'bc',x:1110,y:1460,mgr:'n51',line:'direct'},
-  n53: {id:'n53',role:'Junior Technician',            name:'Nanthakumar',            type:'bc',x:1110,y:1610,mgr:'n52',line:'direct'},
-  n54: {id:'n54',role:'Junior Technician',            name:'Ms. Deepa',              type:'bc',x:1110,y:1760,mgr:'n53',line:'direct'},
-  n55: {id:'n55',role:'Diploma Trainee',              name:'Rajkumar',               type:'bc',x:1110,y:1910,mgr:'n54',line:'direct'},
-  n56: {id:'n56',role:'Diploma Trainee',              name:'Hemanth Kumar',          type:'bc',x:1110,y:2060,mgr:'n55',line:'direct'},
-  n57: {id:'n57',role:'Diploma Trainee',              name:'Annaswami',              type:'bc',x:1110,y:2210,mgr:'n56',line:'direct'},
-  n58: {id:'n58',role:'Diploma Trainee',              name:'V. Babu',                type:'bc',x:1110,y:2360,mgr:'n57',line:'direct'},
-  n59: {id:'n59',role:'Contract Labour',              name:'Rajul',                  type:'cl',x:1110,y:2510,mgr:'n58',line:'direct'},
-  n61: {id:'n61',role:'Accounts Manager',             name:'Karumanthi Sundaram',    type:'wc',x:930, y:560, mgr:'n60',line:'direct'},
-  n62: {id:'n62',role:'Accounting Asst',              name:'Vasanth Kumar',          type:'wc',x:930, y:710, mgr:'n61',line:'direct'},
-  n13: {id:'n13',role:'Manager Lubrication, R&D',    name:'Kasper Nissen',          type:'wc',x:505, y:560, mgr:'n12',line:'dotted'},
-  n14: {id:'n14',role:'Technical Engineer',           name:'Anand Raj',              type:'wc',x:420, y:710, mgr:'n13',line:'dotted'},
-  n15: {id:'n15',role:'Manager PDM & ECM Engg',      name:'Ivan Grabevac',          type:'wc',x:510, y:710, mgr:'n13',line:'dotted'},
-  n16: {id:'n16',role:'Configuration Lead – PDM',    name:'Dharani Kumar',          type:'wc',x:510, y:860, mgr:'n15',line:'direct'},
-  n17: {id:'n17',role:'HydraSpecma US – MD',         name:'Jody Coleman',           type:'wc',x:640, y:860, mgr:'n15',line:'dotted'},
-  n18: {id:'n18',role:'Operational Buyer',            name:'Vivekraj',               type:'bc',x:640, y:1010,mgr:'n17',line:'direct'},
-  n19: {id:'n19',role:'Logistic Manager',             name:'Fredrik Stokholm',       type:'wc',x:775, y:860, mgr:'n15',line:'dotted'},
-  n20: {id:'n20',role:'Operational Buyer',            name:'Balachandar',            type:'bc',x:775, y:1010,mgr:'n19',line:'direct'}
+  // ── LEFT COLUMN: Global (vertical stack x=20)
+  n1:  {id:'n1', role:'Head of Operations',            name:'Simon Steen Kristensen',  type:'gs', x:20,   y:30,   mgr:null,  line:'direct'},
+  n2:  {id:'n2', role:'Procurement Global Head',       name:'Christian Evers',         type:'gc', x:20,   y:170,  mgr:'n1',  line:'dotted'},
+  n7:  {id:'n7', role:'Customer Service Global Head',  name:'Brian Vind Jensen',       type:'gc', x:20,   y:310,  mgr:'n1',  line:'dotted'},
+  n63: {id:'n63',role:'Quality Global Head',           name:'Robert Kaleta',           type:'gc', x:20,   y:450,  mgr:'n1',  line:'dotted'},
+  n64: {id:'n64',role:'Finance Global Head',           name:'Thomas Aarup Christensen',type:'gc', x:20,   y:590,  mgr:'n1',  line:'dotted'},
+  // ── MAIN TREE row0
+  n12: {id:'n12',role:'Country Manager — India',       name:'Babu Parthasarathy',      type:'wc', x:860,  y:30,   mgr:'n1',  line:'direct'},
+  // ── Row1: direct reports to Babu (horizontal spread y=200)
+  n3:  {id:'n3', role:'Procurement Lead',              name:'Prabhu',                  type:'wc', x:215,  y:200,  mgr:'n12', line:'direct', dualMgr:'n2',  dualLine:'dotted'},
+  n8:  {id:'n8', role:'Customer Service',              name:'Dinesh Kumar Singh',      type:'wc', x:390,  y:200,  mgr:'n12', line:'direct', dualMgr:'n7',  dualLine:'dotted'},
+  n21: {id:'n21',role:'People & Culture',              name:'Suresh Kumar',            type:'wc', x:565,  y:200,  mgr:'n12', line:'direct'},
+  n22: {id:'n22',role:'Dynamic App Specialist – IT',  name:'Manigandan',              type:'wc', x:740,  y:200,  mgr:'n12', line:'direct'},
+  n13: {id:'n13',role:'Manager Lubrication, R&D',     name:'Kasper Nissen',           type:'wc', x:915,  y:200,  mgr:'n12', line:'dotted'},
+  n23: {id:'n23',role:'Operations Manager & QEHS',    name:'Kumaran',                 type:'wc', x:1090, y:200,  mgr:'n12', line:'direct'},
+  n60: {id:'n60',role:'Financial Controller',          name:'Balaji Jayaram',          type:'wc', x:1430, y:200,  mgr:'n12', line:'direct', dualMgr:'n64', dualLine:'dotted'},
+  // ── Children of Prabhu (n3) — vertical stack at x=215
+  n4:  {id:'n4', role:'Senior Engineer Purchase',      name:'Dharani Kumar',           type:'wc', x:215,  y:370,  mgr:'n3',  line:'direct'},
+  n5:  {id:'n5', role:'Asst Manager (NPD)',            name:'Vignesh',                 type:'wc', x:215,  y:510,  mgr:'n3',  line:'direct'},
+  n6:  {id:'n6', role:'Asst Manager Sourcing & VD',   name:'Prakash',                 type:'wc', x:215,  y:650,  mgr:'n3',  line:'direct'},
+  // ── Children of Dinesh (n8) — vertical stack at x=390
+  n9:  {id:'n9', role:'Sales Coordinator',             name:'Janki Basu',              type:'wc', x:390,  y:370,  mgr:'n8',  line:'direct'},
+  n11: {id:'n11',role:'Office Asst Admin',             name:'Ms. Usha',                type:'wc', x:390,  y:510,  mgr:'n8',  line:'direct'},
+  // ── Child of Janki Basu (n9)
+  n10: {id:'n10',role:'Sales',                         name:'Lokesh / Trainee',        type:'bc', x:390,  y:650,  mgr:'n9',  line:'direct'},
+  // ── Children of Kasper (n13) — vertical at x=915
+  n14: {id:'n14',role:'Technical Engineer',            name:'Anand Raj',               type:'wc', x:915,  y:370,  mgr:'n13', line:'dotted'},
+  n15: {id:'n15',role:'Manager PDM & ECM Engg',       name:'Ivan Grabevac',           type:'wc', x:915,  y:510,  mgr:'n13', line:'dotted'},
+  // ── Children of Ivan (n15) — vertical at x=915 / x=1055
+  n16: {id:'n16',role:'Configuration Lead – PDM',     name:'Dharani Kumar',           type:'wc', x:915,  y:650,  mgr:'n15', line:'direct'},
+  n17: {id:'n17',role:'HydraSpecma US – MD',          name:'Jody Coleman',            type:'wc', x:915,  y:790,  mgr:'n15', line:'dotted'},
+  n19: {id:'n19',role:'Logistic Manager',              name:'Fredrik Stokholm',        type:'wc', x:1055, y:790,  mgr:'n15', line:'dotted'},
+  n18: {id:'n18',role:'Operational Buyer',             name:'Vivekraj',                type:'bc', x:915,  y:930,  mgr:'n17', line:'direct'},
+  n20: {id:'n20',role:'Operational Buyer',             name:'Balachandar',             type:'bc', x:1055, y:930,  mgr:'n19', line:'direct'},
+  // ── Children of Kumaran (n23) — horizontal spread y=370
+  n24: {id:'n24',role:'Warehouse Engineer',            name:'Perumal',                 type:'wc', x:1090, y:370,  mgr:'n23', line:'direct'},
+  n25: {id:'n25',role:'Asst Manager Quality',         name:'Arun Bharadwaj',          type:'wc', x:1265, y:370,  mgr:'n23', line:'direct'},
+  n34: {id:'n34',role:'Logistics – Asst Manager',    name:'Rajesh Kumar',             type:'wc', x:1440, y:370,  mgr:'n23', line:'direct'},
+  n46: {id:'n46',role:'Production Manager',            name:'Mohan Srinivasan',        type:'wc', x:1615, y:370,  mgr:'n23', line:'direct'},
+  // ── Children of Arun Bharadwaj (n25)
+  n26: {id:'n26',role:'Deputy Manager SQD',           name:'Surya Vaman',             type:'wc', x:1165, y:510,  mgr:'n25', line:'direct'},
+  n29: {id:'n29',role:'Fork Lift Operator',           name:'Contract Labour',          type:'cl', x:1265, y:510,  mgr:'n25', line:'direct'},
+  n30: {id:'n30',role:'Senior Quality Engineer',      name:'Arun Raja',               type:'wc', x:1340, y:510,  mgr:'n25', line:'direct'},
+  // ── Surya Vaman (n26) chain at x=1165
+  n27: {id:'n27',role:'Sr Quality Engineer',          name:'Peer Ali',                type:'wc', x:1165, y:650,  mgr:'n26', line:'direct'},
+  n28: {id:'n28',role:'Junior Technician',            name:'Sivagami',                type:'bc', x:1165, y:790,  mgr:'n27', line:'direct'},
+  // ── Arun Raja (n30) children at x=1340
+  n31: {id:'n31',role:'Quality Engineer',             name:'Venkatesan Annamalai',    type:'wc', x:1340, y:650,  mgr:'n30', line:'direct'},
+  n33: {id:'n33',role:'Fork Lift Operator',           name:'Contract QL',             type:'cl', x:1340, y:790,  mgr:'n30', line:'direct'},
+  n32: {id:'n32',role:'Jr Quality Engineer',          name:'Srinivasan',              type:'wc', x:1340, y:930,  mgr:'n31', line:'direct'},
+  // ── Prod Eng chain (n34→n35) at x=1440, Elangovan chain at x=1530
+  n35: {id:'n35',role:'Prod Eng',                     name:'Yuvaraj Gopala Krishnan', type:'wc', x:1440, y:510,  mgr:'n34', line:'direct'},
+  n36: {id:'n36',role:'Senior Technician',            name:'Elangovan',               type:'bc', x:1530, y:650,  mgr:'n35', line:'direct'},
+  n37: {id:'n37',role:'Prod Tech',                    name:'Tamil Selvan',            type:'bc', x:1530, y:790,  mgr:'n36', line:'direct'},
+  n38: {id:'n38',role:'Prod Tech',                    name:'Vignesh',                 type:'bc', x:1530, y:930,  mgr:'n37', line:'direct'},
+  n39: {id:'n39',role:'Junior Technician',            name:'Mohammed Rafiq',          type:'bc', x:1530, y:1070, mgr:'n38', line:'direct'},
+  n40: {id:'n40',role:'Junior Technician',            name:'Ms. Selvi',               type:'bc', x:1530, y:1210, mgr:'n39', line:'direct'},
+  n41: {id:'n41',role:'Diploma Trainee',              name:'Prasanth',                type:'bc', x:1530, y:1350, mgr:'n40', line:'direct'},
+  n42: {id:'n42',role:'Contract Labour',              name:'Sathishkumar',            type:'cl', x:1530, y:1490, mgr:'n41', line:'direct'},
+  n43: {id:'n43',role:'Contract Labour',              name:'Vinoth',                  type:'cl', x:1530, y:1630, mgr:'n42', line:'direct'},
+  n44: {id:'n44',role:'Contract Labour',              name:'Karusiyappan',            type:'cl', x:1530, y:1770, mgr:'n43', line:'direct'},
+  n45: {id:'n45',role:'Contract Labour',              name:'Anandhan',                type:'cl', x:1530, y:1910, mgr:'n44', line:'direct'},
+  // ── Production Manager chain at x=1615
+  n47: {id:'n47',role:'Prod & Maint Incharge',       name:'Shivashankar',            type:'wc', x:1615, y:510,  mgr:'n46', line:'direct'},
+  n48: {id:'n48',role:'Senior Technician',            name:'Prakash',                 type:'bc', x:1615, y:650,  mgr:'n47', line:'direct'},
+  n49: {id:'n49',role:'Senior Technician',            name:'Kumareson',               type:'bc', x:1615, y:790,  mgr:'n48', line:'direct'},
+  n50: {id:'n50',role:'Technician',                   name:'A Sathish',               type:'bc', x:1615, y:930,  mgr:'n49', line:'direct'},
+  n51: {id:'n51',role:'Maint Technician',             name:'Suresh Umapathy',         type:'bc', x:1615, y:1070, mgr:'n50', line:'direct'},
+  n52: {id:'n52',role:'Technician',                   name:'Sivalincar',              type:'bc', x:1615, y:1210, mgr:'n51', line:'direct'},
+  n53: {id:'n53',role:'Junior Technician',            name:'Nanthakumar',             type:'bc', x:1615, y:1350, mgr:'n52', line:'direct'},
+  n54: {id:'n54',role:'Junior Technician',            name:'Ms. Deepa',               type:'bc', x:1615, y:1490, mgr:'n53', line:'direct'},
+  n55: {id:'n55',role:'Diploma Trainee',              name:'Rajkumar',                type:'bc', x:1615, y:1630, mgr:'n54', line:'direct'},
+  n56: {id:'n56',role:'Diploma Trainee',              name:'Hemanth Kumar',           type:'bc', x:1615, y:1770, mgr:'n55', line:'direct'},
+  n57: {id:'n57',role:'Diploma Trainee',              name:'Annaswami',               type:'bc', x:1615, y:1910, mgr:'n56', line:'direct'},
+  n58: {id:'n58',role:'Diploma Trainee',              name:'V. Babu',                 type:'bc', x:1615, y:2050, mgr:'n57', line:'direct'},
+  n59: {id:'n59',role:'Contract Labour',              name:'Rajul',                   type:'cl', x:1615, y:2190, mgr:'n58', line:'direct'},
+  // ── Financial Controller chain at x=1430
+  n61: {id:'n61',role:'Accounts Manager',             name:'Karumanthi Sundaram',     type:'wc', x:1430, y:370,  mgr:'n60', line:'direct'},
+  n62: {id:'n62',role:'Accounting Asst',              name:'Vasanth Kumar',           type:'wc', x:1430, y:510,  mgr:'n61', line:'direct'}
 };
 
 // Deep-clone helper
 const deepClone = o => JSON.parse(JSON.stringify(o));
 
-// Live working copy of nodes
-let nodes = deepClone(ADMIN_NODES);
+// ════════════════════════════════
+//  PERSISTENCE
+//  Every edit auto-saves to localStorage.
+//  On lock → restores from ADMIN_NODES.
+//  GitHub push bakes nodes into HTML source.
+// ════════════════════════════════
+const LS_NODES  = 'hsin_nodes_v8';
+const LS_DATE   = 'hsin_date_v8';
+const LS_GH_CFG = 'hsin_gh_config_v8';
+
+// ── Save everything after every change
+function saveAll() {
+  try {
+    localStorage.setItem(LS_NODES, JSON.stringify(nodes));
+    localStorage.setItem(LS_DATE,  currentDate);
+    showSaveBadge();
+  } catch(e) { console.warn('Save failed:', e); }
+}
+// Alias — old calls still work
+function saveAdminLayout() { saveAll(); }
+function saveLayout()      { saveAll(); }
+
+// ── Load on startup
+function loadAdminLayout() {
+  try {
+    const raw = localStorage.getItem(LS_NODES);
+    const d   = localStorage.getItem(LS_DATE);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p && p.n1) {
+        if (d) currentDate = d;
+        nodes = p;
+        return true;
+      }
+    }
+  } catch(e) { console.warn('Load failed:', e); }
+  return false;
+}
+
+// ── Reset: wipe storage, restore factory defaults
+function resetToDefault() {
+  if (!confirm('Reset ALL data to original? All edits will be lost.')) return;
+  localStorage.removeItem(LS_NODES);
+  localStorage.removeItem(LS_DATE);
+  nodes = deepClone(ADMIN_NODES);
+  currentDate = '09-01-2026';
+  const dd = document.getElementById('displayDate');
+  if(dd) dd.textContent = currentDate;
+  collapsed.clear();
+  render();
+  toast('Reset to original data', 'info');
+}
+
+function showSaveBadge() {
+  let b = document.getElementById('svBadge');
+  if (!b) {
+    b = document.createElement('div'); b.id = 'svBadge';
+    b.style.cssText = 'position:fixed;top:62px;right:16px;background:#2e7d32;color:#fff;padding:5px 12px;border-radius:20px;font-size:.66rem;font-weight:700;z-index:500;pointer-events:none;box-shadow:0 3px 12px rgba(0,0,0,.4)';
+    document.body.appendChild(b);
+  }
+  b.textContent = '💾 Saved'; b.style.opacity='1'; b.style.transition='';
+  clearTimeout(b._t);
+  b._t = setTimeout(()=>{ b.style.transition='opacity .5s'; b.style.opacity='0'; setTimeout(()=>b.remove(),600); }, 2000);
+}
+
+// ════════════════════════════════
+//  GITHUB AUTO-PUSH
+//  Bakes current nodes + currentDate
+//  into the HTML file source and pushes
+//  to GitHub so all users see changes.
+// ════════════════════════════════
+function openGithubModal() {
+  if(isLocked){ toast('🔒 Unlock to push','err'); return; }
+  try {
+    const cfg = JSON.parse(localStorage.getItem(LS_GH_CFG)||'{}');
+    document.getElementById('ghUser').value   = cfg.user   || '';
+    document.getElementById('ghRepo').value   = cfg.repo   || '';
+    document.getElementById('ghFile').value   = cfg.file   || 'index.html';
+    document.getElementById('ghBranch').value = cfg.branch || 'main';
+    document.getElementById('ghToken').value  = cfg.token  || '';
+  } catch(e){}
+  document.getElementById('ghStatus').style.display = 'none';
+  document.getElementById('githubModal').style.display = 'flex';
+}
+function closeGithubModal() {
+  document.getElementById('githubModal').style.display = 'none';
+}
+function saveGhConfig() {
+  const cfg = {
+    user:   document.getElementById('ghUser').value.trim(),
+    repo:   document.getElementById('ghRepo').value.trim(),
+    file:   document.getElementById('ghFile').value.trim() || 'index.html',
+    branch: document.getElementById('ghBranch').value.trim() || 'main',
+    token:  document.getElementById('ghToken').value.trim()
+  };
+  localStorage.setItem(LS_GH_CFG, JSON.stringify(cfg));
+  toast('GitHub config saved','info');
+}
+function ghStatus(msg, type) {
+  const el = document.getElementById('ghStatus');
+  el.style.display = 'block';
+  el.style.background = type==='ok'?'rgba(46,125,50,.25)':type==='err'?'rgba(183,28,28,.25)':'rgba(13,71,161,.25)';
+  el.style.border = `1px solid ${type==='ok'?'#4caf50':type==='err'?'#ef5350':'#1565c0'}`;
+  el.style.color  = type==='ok'?'#81c784':type==='err'?'#ef9a9a':'#90caf9';
+  el.textContent  = msg;
+}
+
+// ── Core: bake current nodes data into the HTML source
+function bakeNodesToHtml(sourceHtml) {
+  // Replace ADMIN_NODES block with current nodes (positions + structure)
+  // Also update display date
+  const nodesJson = JSON.stringify(nodes, null, 2);
+
+  // Find and replace const ADMIN_NODES = {...};
+  // Use a regex that matches the full block
+  const pattern = /const ADMIN_NODES\s*=\s*\{[\s\S]*?\n\};/;
+  let updated = sourceHtml.replace(pattern, 'const ADMIN_NODES = ' + nodesJson + ';');
+
+  // Update display date in header
+  updated = updated.replace(
+    /(<span id="displayDate">)[^<]*/,
+    `$1${currentDate}`
+  );
+
+  return updated;
+}
+
+async function pushToGithub() {
+  const user   = document.getElementById('ghUser').value.trim();
+  const repo   = document.getElementById('ghRepo').value.trim();
+  const file   = document.getElementById('ghFile').value.trim() || 'index.html';
+  const branch = document.getElementById('ghBranch').value.trim() || 'main';
+  const token  = document.getElementById('ghToken').value.trim();
+
+  if(!user||!repo||!token){ ghStatus('❌ Username, repo and token are required','err'); return; }
+
+  const btn = document.getElementById('ghPushBtn');
+  btn.disabled=true; btn.textContent='⏳ Pushing…';
+  ghStatus('🔄 Connecting to GitHub…','info');
+
+  try {
+    const apiBase = `https://api.github.com/repos/${user}/${repo}/contents/${file}`;
+    const headers = {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+
+    // Step 1 — get current file to obtain SHA
+    ghStatus('🔄 Fetching current file from GitHub…','info');
+    let sha = null;
+    try {
+      const getRes = await fetch(`${apiBase}?ref=${branch}`, {headers});
+      if(getRes.ok) {
+        const getData = await getRes.json();
+        sha = getData.sha;
+        // Step 2 — decode existing HTML, bake new data into it
+        ghStatus('🔄 Baking updated data into HTML…','info');
+        const existingHtml = decodeURIComponent(escape(atob(getData.content.replace(/\n/g,''))));
+        const updatedHtml  = bakeNodesToHtml(existingHtml);
+        const encoded = btoa(unescape(encodeURIComponent(updatedHtml)));
+
+        // Step 3 — push
+        ghStatus('🔄 Pushing to GitHub…','info');
+        const body = {
+          message: `Update organigram — ${currentDate} — ${new Date().toLocaleString()}`,
+          content: encoded,
+          branch,
+          sha
+        };
+        const putRes = await fetch(apiBase, { method:'PUT', headers, body:JSON.stringify(body) });
+        if(!putRes.ok){ const e=await putRes.json(); throw new Error(e.message||`HTTP ${putRes.status}`); }
+        ghStatus(`✅ Pushed! GitHub Pages updates in ~30s\n🔗 https://${user}.github.io/${repo}/`,'ok');
+      } else if(getRes.status===404) {
+        // File doesn't exist — create it using current page source
+        ghStatus('🔄 Creating new file on GitHub…','info');
+        const currentHtml = '<!DOCTYPE html>' + document.documentElement.outerHTML;
+        const updatedHtml = bakeNodesToHtml(currentHtml);
+        const encoded = btoa(unescape(encodeURIComponent(updatedHtml)));
+        const body = {
+          message: `Create organigram — ${currentDate}`,
+          content: encoded,
+          branch
+        };
+        const putRes = await fetch(apiBase, { method:'PUT', headers, body:JSON.stringify(body) });
+        if(!putRes.ok){ const e=await putRes.json(); throw new Error(e.message||`HTTP ${putRes.status}`); }
+        ghStatus(`✅ File created! GitHub Pages updates in ~30s\n🔗 https://${user}.github.io/${repo}/`,'ok');
+      } else {
+        const e=await getRes.json(); throw new Error(e.message||`HTTP ${getRes.status}`);
+      }
+    } catch(fetchErr) {
+      if(fetchErr.message&&fetchErr.message.includes('Failed to fetch')) throw new Error('Network error — check internet connection');
+      throw fetchErr;
+    }
+    saveGhConfig();
+    toast('⬆ Pushed to GitHub ✓','info');
+  } catch(e) {
+    let msg = e.message||'Unknown error';
+    if(msg.includes('Bad credentials')) msg='Invalid token — check your PAT has repo scope';
+    if(msg.includes('Not Found'))       msg='Repo not found — check username and repo name';
+    ghStatus('❌ Push failed: '+msg,'err');
+  } finally {
+    btn.disabled=false; btn.textContent='⬆ Push Now';
+  }
+}
+
+// ── Initialise nodes from localStorage or factory defaults
+let nodes = loadAdminLayout() ? nodes : deepClone(ADMIN_NODES);
 
 // ════════════════════════════════
 //  STATE
@@ -586,7 +863,7 @@ function applyLockState(){
   lt.classList.toggle('locked',isLocked);
   document.getElementById('lockIcon').textContent=isLocked?'🔒':'🔓';
   document.getElementById('lockLabel').textContent=isLocked?'Locked':'Unlocked';
-  ['btnAdd','btnAL','tvBtnAdd','dateBtn','btnExport','btnImport','tvBtnExport'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=isLocked;});
+  ['btnAdd','btnAL','tvBtnAdd','dateBtn','btnExport','btnImport','tvBtnExport','btnSaveLayout','btnReset','btnGhPush'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=isLocked;});
   if(currentView==='chart') render(); else renderTable();
 }
 
@@ -707,27 +984,109 @@ function expandAll(){collapsed.clear();render();}
 
 function drawConnectors(){
   const svg=document.getElementById('connSvg');svg.innerHTML='';
+  const NW=NODE_W, NH=NODE_H;
+
+  function seg(d,stroke,width,dash){
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',d);p.setAttribute('fill','none');
+    p.setAttribute('stroke',stroke);p.setAttribute('stroke-width',String(width));
+    p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');
+    if(dash)p.setAttribute('stroke-dasharray',dash);
+    svg.appendChild(p);
+  }
+  function arrow(x,y,color){
+    const a=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    a.setAttribute('points',`${x},${y} ${x-5},${y-8} ${x+5},${y-8}`);
+    a.setAttribute('fill',color);svg.appendChild(a);
+  }
+  function arrowRight(x,y,color){
+    // Arrow pointing left (→ into left edge of card)
+    const a=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    a.setAttribute('points',`${x},${y} ${x-8},${y-5} ${x-8},${y+5}`);
+    a.setAttribute('fill',color);svg.appendChild(a);
+  }
+
+  // Group children by parent
+  const childMap={};
   Object.values(nodes).forEach(n=>{
     if(!n.mgr||!isVisible(n.id))return;
     const par=nodes[n.mgr];
     if(!par||!isVisible(par.id))return;
-    drawLine(svg,par,n,n.line,false);
-    if(n.dualMgr&&nodes[n.dualMgr]&&isVisible(n.dualMgr))
-      drawLine(svg,nodes[n.dualMgr],n,n.dualLine||'dotted',true);
+    if(!childMap[n.mgr])childMap[n.mgr]=[];
+    childMap[n.mgr].push(n);
+  });
+
+  Object.entries(childMap).forEach(([parId,children])=>{
+    const par=nodes[parId];
+
+    // Sort children by y position
+    children.sort((a,b)=>a.y-b.y);
+
+    const sameCol = children.every(c=>Math.abs(c.x - par.x) < 5);
+
+    if(sameCol){
+      // ── VERTICAL STACK (same x): right-side branch lines
+      // Right edge of parent card
+      const branchX = par.x + NW + 20; // 20px right of card edge
+      const parMidY  = par.y + NH/2;
+
+      // Vertical spine from parent mid-right down to last child mid
+      const lastChild = children[children.length-1];
+      const spineTop  = parMidY;
+      const spineBot  = lastChild.y + NH/2;
+
+      const isDotAll = children.every(c=>c.line==='dotted');
+      const spineCol = isDotAll?'#e65100':'#1565c0';
+      const spineDash= isDotAll?'6 4':null;
+
+      // Horizontal stub from parent right edge to spine
+      seg(`M${par.x+NW},${parMidY} L${branchX},${parMidY}`,spineCol,2,spineDash);
+      // Vertical spine
+      seg(`M${branchX},${spineTop} L${branchX},${spineBot}`,spineCol,2,spineDash);
+
+      children.forEach(ch=>{
+        const isDot = ch.line==='dotted';
+        const col   = isDot?'#e65100':'#1565c0';
+        const dash  = isDot?'6 4':null;
+        const chMidY= ch.y + NH/2;
+        // Horizontal from spine to left edge of child card
+        seg(`M${branchX},${chMidY} L${ch.x},${chMidY}`,col,2,dash);
+        arrowRight(ch.x, chMidY, col);
+      });
+
+    } else {
+      // ── DIFFERENT COLUMNS: straight vertical line from parent bottom centre
+      const px = par.x+NW/2, py = par.y+NH;
+      children.forEach(ch=>{
+        const cx   = ch.x+NW/2, cy = ch.y;
+        const isDot= ch.line==='dotted';
+        const col  = isDot?'#e65100':'#1565c0';
+        const dash = isDot?'6 4':null;
+        if(Math.abs(px-cx)<5){
+          seg(`M${px},${py} L${cx},${cy}`,col,2,dash);
+        } else {
+          const midY=py+Math.round((cy-py)*0.5);
+          seg(`M${px},${py} L${px},${midY} L${cx},${midY} L${cx},${cy}`,col,2,dash);
+        }
+        arrow(cx,cy,col);
+      });
+    }
+  });
+
+  // ── Dual-report lines (purple dashed L-shape)
+  Object.values(nodes).forEach(n=>{
+    if(!n.dualMgr||!nodes[n.dualMgr]||!isVisible(n.id))return;
+    const dm=nodes[n.dualMgr];
+    if(!isVisible(dm.id))return;
+    const ox=8;
+    const x1=dm.x+NW/2+ox, y1=dm.y+NH;
+    const x2=n.x+NW/2+ox,  y2=n.y;
+    const midY=y1+Math.round((y2-y1)*0.5);
+    seg(`M${x1},${y1} L${x1},${midY} L${x2},${midY} L${x2},${y2}`,'#9c27b0',2,'5 4');
+    arrow(x2,y2,'#9c27b0');
   });
 }
-function drawLine(svg,fN,tN,lt,isDual){
-  const x1=fN.x+NODE_W/2,y1=fN.y+NODE_H,x2=tN.x+NODE_W/2,y2=tN.y,cy=(y1+y2)/2;
-  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d',`M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`);
-  p.setAttribute('class','conn-line '+(lt==='dotted'?'dotted':'direct'));
-  if(isDual){p.style.stroke='#9c27b0';p.style.strokeDasharray='5 3';}
-  svg.appendChild(p);
-  const arr=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-  arr.setAttribute('points',`${x2},${y2} ${x2-5},${y2-8} ${x2+5},${y2-8}`);
-  arr.setAttribute('fill',isDual?'#9c27b0':(lt==='dotted'?'#e65100':'#1565c0'));
-  svg.appendChild(arr);
-}
+function drawLine(svg,fN,tN,lt,isDual){}
 function updateGlobalPanel(){
   const list=document.getElementById('globalList');list.innerHTML='';
   Object.values(nodes).filter(n=>n.type==='gs'||n.type==='gc').forEach(n=>{
