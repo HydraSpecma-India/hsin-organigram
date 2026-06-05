@@ -198,33 +198,34 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   text-align: left;
 }
 .node-avatar {
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  top: 24px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   background-color: #15202b;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, box-shadow 0.22s ease;
-}
-.node-avatar.empty {
-  border: 1.5px dashed rgba(255, 255, 255, 0.2);
-  color: #888;
-  font-size: 0.8rem;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+  z-index: 10;
 }
 .node:hover .node-avatar {
-  transform: scale(1.18) translateZ(12px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  border-color: #ffcb05;
+  transform: translate(-36px, 12px) scale(4.5) translateZ(30px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.65);
+  border-color: #ffd600;
+  z-index: 300 !important;
 }
 .node.dragging .node-avatar {
-  transform: scale(1.22) translateZ(20px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.6);
-  border-color: #ffcb05;
+  transform: translate(-38px, 12px) scale(4.8) translateZ(40px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.7);
+  border-color: #ffd600;
+  z-index: 300 !important;
+}
+.node.has-avatar {
+  padding: 14px 8px 14px 42px !important;
+  text-align: left !important;
 }
 .node-info {
   flex: 1;
@@ -593,11 +594,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <span style="font-size:.68rem;color:#555;margin-left:3px" id="tvCount"></span>
   </div>
   <table class="org-table"><thead><tr>
-    <th>Name</th><th>Role / Title</th><th>Type</th><th>Primary Manager</th><th>2nd Manager</th><th style="width:115px">Actions</th>
+    <th>Name</th><th>Email ID</th><th>Role / Title</th><th>Type</th><th>Primary Manager</th><th>2nd Manager</th><th style="width:115px">Actions</th>
   </tr></thead><tbody id="tvBody"></tbody></table>
   <div class="tv-nomgr-section" id="tvNmSec" style="display:none">
     <h4>👤 Employees Without Manager</h4>
-    <table class="org-table"><thead><tr><th>Name</th><th>Role</th><th>Type</th><th>Actions</th></tr></thead>
+    <table class="org-table"><thead><tr><th>Name</th><th>Email ID</th><th>Role</th><th>Type</th><th>Actions</th></tr></thead>
     <tbody id="tvNmBody"></tbody></table>
   </div>
 </div>
@@ -626,6 +627,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
   <label>Role / Title</label><input id="editRole" type="text">
   <label>Name</label><input id="editName" type="text">
+  <label>Email ID</label><input id="editEmail" type="text">
   <label>Card Type</label>
   <select id="editType">
     <option value="wc">White Collar</option><option value="bc">Blue Collar</option>
@@ -912,8 +914,7 @@ const ADMIN_NODES = {
     "x": 1001.949951171875,
     "y": 258.9375,
     "mgr": "n12",
-    "line": "direct",
-    "avatar": "image/n22.jpg"
+    "line": "direct"
   },
   "n13": {
     "id": "n13",
@@ -1494,7 +1495,6 @@ function saveAll() {
 function saveAdminLayout() { saveAll(); }
 function saveLayout()      { saveAll(); }
 
-// ── Load on startup
 function loadAdminLayout() {
   try {
     const raw = localStorage.getItem(LS_NODES);
@@ -1504,6 +1504,12 @@ function loadAdminLayout() {
       if (p && p.n1) {
         if (d) currentDate = d;
         nodes = p;
+        // Migrate legacy images/ paths to image/
+        Object.values(nodes).forEach(n => {
+          if (n.avatar && n.avatar.startsWith('images/')) {
+            n.avatar = n.avatar.replace(/^images\//, 'image/');
+          }
+        });
         return true;
       }
     }
@@ -1619,6 +1625,54 @@ async function pushToGithub() {
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
     };
+
+    // Step 0 — upload base64 images to image/ folder
+    const base64Marker = ';base64,';
+    const nodesList = Object.values(nodes);
+    for (let i = 0; i < nodesList.length; i++) {
+      const n = nodesList[i];
+      if (n.avatar && n.avatar.startsWith('images/')) {
+        n.avatar = n.avatar.replace(/^images\//, 'image/');
+      }
+      if (n.avatar && n.avatar.startsWith('data:') && n.avatar.includes(base64Marker)) {
+        const parts = n.avatar.split(base64Marker);
+        const rawBase64 = parts[1];
+        const imagePath = `image/${n.id}.jpg`;
+        
+        ghStatus(`🔄 Uploading image for ${n.name} to GitHub…`, 'info');
+        const imgApiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${imagePath}`;
+        
+        let imgSha = null;
+        try {
+          const getImg = await fetch(`${imgApiUrl}?ref=${branch}`, { headers });
+          if (getImg.ok) {
+            const getImgData = await getImg.json();
+            imgSha = getImgData.sha;
+          }
+        } catch (e) {}
+        
+        const imgBody = {
+          message: `Upload avatar for ${n.name}`,
+          content: rawBase64,
+          branch
+        };
+        if (imgSha) imgBody.sha = imgSha;
+        
+        const putImg = await fetch(imgApiUrl, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(imgBody)
+        });
+        
+        if (!putImg.ok) {
+          const e = await putImg.json();
+          throw new Error(`Failed to upload image for ${n.name}: ${e.message || putImg.status}`);
+        }
+        
+        n.avatar = imagePath;
+      }
+    }
+    saveAll();
 
     // Step 1 — get current file to obtain SHA
     ghStatus('🔄 Fetching current file from GitHub…','info');
@@ -1811,7 +1865,7 @@ function render(){
     if(!isVisible(n.id))return;
     const el=document.createElement('div');
     const nc=nodeClass(n);
-    el.className='node '+nc+' '+n.type+(isLocked?' locked-mode':'');
+    el.className='node '+nc+' '+n.type+(isLocked?' locked-mode':'')+(n.avatar?' has-avatar':'');
     el.id='nd_'+n.id; el.dataset.id=n.id;
     el.style.left=n.x+'px'; el.style.top=n.y+'px';
     el.style.animationDelay=(delay*0.022)+'s'; delay++;
@@ -1829,16 +1883,12 @@ function render(){
       ${hasC?`<button class="nab tog" onclick="event.stopPropagation();toggleCollapse('${n.id}')">${collapsed.has(n.id)?'▶':'▼'}</button>`:''}
     </div>`;
     el.innerHTML=`${actHtml}
-      <div class="node-content">
-        ${n.avatar ? `<div class="node-avatar" style="background-image: url('${n.avatar}')"></div>` : `<div class="node-avatar empty">👤</div>`}
-        <div class="node-info">
-          <span class="role">${esc(n.role)}</span>
-          <span class="name">${esc(n.name)}</span>
-          ${countStr}
-          ${n.dualMgr?'<span class="dual-badge">⇄ Dual</span>':''}
-          ${(!n.mgr&&n.id!=='n1'&&n.type!=='gc')?'<span class="nomgr-badge">👤 No Mgr</span>':''}
-        </div>
-      </div>`;
+      ${n.avatar ? `<div class="node-avatar" style="background-image: url('${n.avatar}')"></div>` : ''}
+      <span class="role">${esc(n.role)}</span>
+      <span class="name">${esc(n.name)}</span>
+      ${countStr}
+      ${n.dualMgr?'<span class="dual-badge">⇄ Dual</span>':''}
+      ${(!n.mgr&&n.id!=='n1'&&n.type!=='gc')?'<span class="nomgr-badge">👤 No Mgr</span>':''}`;
     // collapse toggle btn at bottom (click the node name area)
     if(hasC){
       const ctb=document.createElement('div');
@@ -2493,6 +2543,7 @@ function openEdit(id){
 
   document.getElementById('editRole').value=n.role;
   document.getElementById('editName').value=n.name;
+  document.getElementById('editEmail').value=n.email||'';
   document.getElementById('editType').value=n.type;
   document.getElementById('editLine').value=n.line||'direct';
   const path=getPath(id);
@@ -2533,6 +2584,7 @@ function saveEdit(){
   const n=nodes[editingId];if(!n)return;
   n.role=document.getElementById('editRole').value.trim()||n.role;
   n.name=document.getElementById('editName').value.trim()||n.name;
+  n.email=document.getElementById('editEmail').value.trim();
   n.type=document.getElementById('editType').value;
   n.line=document.getElementById('editLine').value;
   if(noMgrSel){n.mgr=null;}
@@ -2646,6 +2698,7 @@ function renderTable(){
           <input class="tvc-input" id="tvi-name" value="${esc(n.name)}">
         </div>
       </td>
+        <td><input class="tvc-input" id="tvi-email" value="${esc(n.email||'')}" placeholder="Email ID"></td>
         <td><input class="tvc-input" id="tvi-role" value="${esc(n.role)}"></td>
         <td><select class="tvc-select" id="tvi-type">
           <option value="wc"${n.type==='wc'?' selected':''}>White</option>
@@ -2668,6 +2721,7 @@ function renderTable(){
         ${n.avatar ? `<div class="tv-avatar" style="background-image: url('${n.avatar}')"></div>` : `<div class="tv-avatar empty">👤</div>`}
         <span>${esc(n.name)}${childC?` <span style="font-size:.6rem;color:#888;font-weight:400">(${childC} direct)</span>`:''}</span>
       </td>
+        <td style="color:#80deea">${esc(n.email||'')}</td>
         <td style="color:#bbb">${esc(n.role)}</td>
         <td><span class="tv-badge ${isNm?'nomgr':n.type}">${isNm?'No Mgr':typeLabel[n.type]||n.type}</span></td>
         <td style="color:#999">${par?esc(par.name):(n.type==='gc'?'':'<span style="color:#9c27b0">— Unassigned</span>')}</td>
@@ -2684,7 +2738,9 @@ function renderTable(){
     nmSec.style.display='block';
     nm.forEach(n=>{
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${esc(n.name)}</td><td style="color:#bbb">${esc(n.role)}</td>
+      tr.innerHTML=`<td>${esc(n.name)}</td>
+        <td style="color:#80deea">${esc(n.email||'')}</td>
+        <td style="color:#bbb">${esc(n.role)}</td>
         <td><span class="tv-badge ${n.type}">${typeLabel[n.type]}</span></td>
         <td>${isLocked?'🔒':`<button class="tcb ed" onclick="tvEditingId='${n.id}';renderTable()">✎ Assign Mgr</button>`}</td>`;
       nmBody.appendChild(tr);
@@ -2695,6 +2751,7 @@ function renderTable(){
     const mgrOpts2=Object.values(nodes).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
     const tr=document.createElement('tr');tr.className='';
     tr.innerHTML=`<td><input class="tv-add-input" id="tvAN" placeholder="Name"></td>
+      <td><input class="tv-add-input" id="tvAE" placeholder="Email ID"></td>
       <td><input class="tv-add-input" id="tvAR" placeholder="Role"></td>
       <td><select class="tv-add-sel" id="tvAT">
         <option value="wc">White</option><option value="bc">Blue</option>
@@ -2710,6 +2767,7 @@ function renderTable(){
 function tvSave(id){
   const n=nodes[id];if(!n)return;
   n.name=document.getElementById('tvi-name').value.trim()||n.name;
+  n.email=document.getElementById('tvi-email').value.trim();
   n.role=document.getElementById('tvi-role').value.trim()||n.role;
   n.type=document.getElementById('tvi-type').value;
   n.mgr=document.getElementById('tvi-mgr').value||null;
@@ -2725,10 +2783,11 @@ function tvDel(id){
 }
 function tvAdd(){
   const name=document.getElementById('tvAN').value.trim();
+  const email=document.getElementById('tvAE').value.trim();
   const role=document.getElementById('tvAR').value.trim();
   if(!name&&!role){toast('Enter name or role','err');return;}
   const mgr=document.getElementById('tvAM').value||null;
-  const n={id:newId(),role:role||'New Role',name:name||'New Person',type:document.getElementById('tvAT').value,x:200,y:200,mgr,line:'direct'};
+  const n={id:newId(),role:role||'New Role',name:name||'New Person',email,type:document.getElementById('tvAT').value,x:200,y:200,mgr,line:'direct'};
   nodes[n.id]=n;renderTable();toast('Added ✓');
 }
 
@@ -2769,11 +2828,11 @@ function getPath(id){const p=[];let c=id;while(c){p.unshift(c);c=nodes[c]?.mgr;}
 // ════════════════════════════════
 function exportExcel(){
   if(isLocked){toast('🔒 Unlock to export','err');return;}
-  const rows=[['ID','Name','Role','Type','Primary Manager ID','Primary Manager Name','2nd Manager ID','2nd Manager Name','Line Type','2nd Line Type']];
+  const rows=[['ID','Name','Email','Role','Type','Primary Manager ID','Primary Manager Name','2nd Manager ID','2nd Manager Name','Line Type','2nd Line Type']];
   Object.values(nodes).forEach(n=>{
     const par=n.mgr?nodes[n.mgr]:null;
     const dm=n.dualMgr?nodes[n.dualMgr]:null;
-    rows.push([n.id,n.name,n.role,typeLabel[n.type]||n.type,n.mgr||'',par?par.name:'',n.dualMgr||'',dm?dm.name:'',n.line||'direct',n.dualLine||'']);
+    rows.push([n.id,n.name,n.email||'',n.role,typeLabel[n.type]||n.type,n.mgr||'',par?par.name:'',n.dualMgr||'',dm?dm.name:'',n.line||'direct',n.dualLine||'']);
   });
   const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
@@ -2796,7 +2855,7 @@ function importExcel(event){
     const hdr=parseCSVLine(lines[0]);
     // find column indices
     const ci=(name)=>hdr.findIndex(h=>h.toLowerCase().includes(name.toLowerCase()));
-    const nameIdx=ci('name'), roleIdx=ci('role'), typeIdx=ci('type'), mgrIdx=ci('primary manager name'), dm2Idx=ci('2nd manager name');
+    const nameIdx=ci('name'), emailIdx=ci('email'), roleIdx=ci('role'), typeIdx=ci('type'), mgrIdx=ci('primary manager name'), dm2Idx=ci('2nd manager name');
     if(nameIdx<0){toast('CSV must have Name column','err');return;}
     importRows=[];
     for(let i=1;i<lines.length;i++){
@@ -2812,6 +2871,7 @@ function importExcel(event){
       else if(typeText.includes('vacant'))type='vacant';
       importRows.push({
         name:cols[nameIdx]?.trim()||'',
+        email:emailIdx>=0?cols[emailIdx]?.trim()||'':'',
         role:roleIdx>=0?cols[roleIdx]?.trim()||'':'',
         type,
         mgrName:mgrIdx>=0?cols[mgrIdx]?.trim()||'':'',
@@ -2836,9 +2896,9 @@ function parseCSVLine(line){
 function showImportPreview(){
   const wrap=document.getElementById('importPreviewWrap');
   if(!importRows.length){toast('No valid rows found','err');return;}
-  let html=`<table class="org-table"><thead><tr><th>Name</th><th>Role</th><th>Type</th><th>Manager</th><th>2nd Mgr</th></tr></thead><tbody>`;
+  let html=`<table class="org-table"><thead><tr><th>Name</th><th>Email ID</th><th>Role</th><th>Type</th><th>Manager</th><th>2nd Mgr</th></tr></thead><tbody>`;
   importRows.forEach(r=>{
-    html+=`<tr><td>${esc(r.name)}</td><td style="color:#bbb">${esc(r.role)}</td><td><span class="tv-badge ${r.type}">${typeLabel[r.type]}</span></td><td style="color:#999">${esc(r.mgrName)||'—'}</td><td style="color:#ce93d8">${esc(r.dualMgrName)||'—'}</td></tr>`;
+    html+=`<tr><td>${esc(r.name)}</td><td style="color:#80deea">${esc(r.email||'')}</td><td style="color:#bbb">${esc(r.role)}</td><td><span class="tv-badge ${r.type}">${typeLabel[r.type]}</span></td><td style="color:#999">${esc(r.mgrName)||'—'}</td><td style="color:#ce93d8">${esc(r.dualMgrName)||'—'}</td></tr>`;
   });
   html+='</tbody></table>';
   wrap.innerHTML=html;
@@ -2857,9 +2917,10 @@ function applyImport(){
       // update existing
       nodes[existId].role=r.role||nodes[existId].role;
       nodes[existId].type=r.type;
+      if(r.email) nodes[existId].email=r.email;
       newNodes[r.name.toLowerCase()]=existId;
     } else {
-      const n={id:newId(),role:r.role||'Imported',name:r.name,type:r.type,x:50+Math.random()*400,y:50+Math.random()*300,mgr:null,line:'direct'};
+      const n={id:newId(),role:r.role||'Imported',name:r.name,email:r.email||'',type:r.type,x:50+Math.random()*400,y:50+Math.random()*300,mgr:null,line:'direct'};
       nodes[n.id]=n;newNodes[r.name.toLowerCase()]=n.id;nameMap[r.name.toLowerCase()]=n.id;
     }
   });
