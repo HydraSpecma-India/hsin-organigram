@@ -510,85 +510,652 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 //  ADMIN DATA (master copy — never mutated by locked users)
 // ════════════════════════════════
 const ADMIN_NODES = {
-  // ── LEFT COLUMN: Global (vertical stack x=20)
-  n1:  {id:'n1', role:'Head of Operations',            name:'Simon Steen Kristensen',  type:'gs', x:20,   y:30,   mgr:null,  line:'direct'},
-  n2:  {id:'n2', role:'Procurement Global Head',       name:'Christian Evers',         type:'gc', x:20,   y:170,  mgr:'n1',  line:'dotted'},
-  n7:  {id:'n7', role:'Customer Service Global Head',  name:'Brian Vind Jensen',       type:'gc', x:20,   y:310,  mgr:'n1',  line:'dotted'},
-  n63: {id:'n63',role:'Quality Global Head',           name:'Robert Kaleta',           type:'gc', x:20,   y:450,  mgr:'n1',  line:'dotted'},
-  n64: {id:'n64',role:'Finance Global Head',           name:'Thomas Aarup Christensen',type:'gc', x:20,   y:590,  mgr:'n1',  line:'dotted'},
-  // ── MAIN TREE row0
-  n12: {id:'n12',role:'Country Manager — India',       name:'Babu Parthasarathy',      type:'wc', x:860,  y:30,   mgr:'n1',  line:'direct'},
-  // ── Row1: direct reports to Babu (horizontal spread y=200)
-  n3:  {id:'n3', role:'Procurement Lead',              name:'Prabhu',                  type:'wc', x:215,  y:200,  mgr:'n12', line:'direct', dualMgr:'n2',  dualLine:'dotted'},
-  n8:  {id:'n8', role:'Customer Service',              name:'Dinesh Kumar Singh',      type:'wc', x:390,  y:200,  mgr:'n12', line:'direct', dualMgr:'n7',  dualLine:'dotted'},
-  n21: {id:'n21',role:'People & Culture',              name:'Suresh Kumar',            type:'wc', x:565,  y:200,  mgr:'n12', line:'direct'},
-  n22: {id:'n22',role:'Dynamic App Specialist – IT',  name:'Manigandan',              type:'wc', x:740,  y:200,  mgr:'n12', line:'direct'},
-  n13: {id:'n13',role:'Manager Lubrication, R&D',     name:'Kasper Nissen',           type:'wc', x:915,  y:200,  mgr:'n12', line:'dotted'},
-  n23: {id:'n23',role:'Operations Manager & QEHS',    name:'Kumaran',                 type:'wc', x:1090, y:200,  mgr:'n12', line:'direct'},
-  n60: {id:'n60',role:'Financial Controller',          name:'Balaji Jayaram',          type:'wc', x:1430, y:200,  mgr:'n12', line:'direct', dualMgr:'n64', dualLine:'dotted'},
-  // ── Children of Prabhu (n3) — vertical stack at x=215
-  n4:  {id:'n4', role:'Senior Engineer Purchase',      name:'Dharani Kumar',           type:'wc', x:215,  y:370,  mgr:'n3',  line:'direct'},
-  n5:  {id:'n5', role:'Asst Manager (NPD)',            name:'Vignesh',                 type:'wc', x:215,  y:510,  mgr:'n3',  line:'direct'},
-  n6:  {id:'n6', role:'Asst Manager Sourcing & VD',   name:'Prakash',                 type:'wc', x:215,  y:650,  mgr:'n3',  line:'direct'},
-  // ── Children of Dinesh (n8) — vertical stack at x=390
-  n9:  {id:'n9', role:'Sales Coordinator',             name:'Janki Basu',              type:'wc', x:390,  y:370,  mgr:'n8',  line:'direct'},
-  n11: {id:'n11',role:'Office Asst Admin',             name:'Ms. Usha',                type:'wc', x:390,  y:510,  mgr:'n8',  line:'direct'},
-  // ── Child of Janki Basu (n9)
-  n10: {id:'n10',role:'Sales',                         name:'Lokesh / Trainee',        type:'bc', x:390,  y:650,  mgr:'n9',  line:'direct'},
-  // ── Children of Kasper (n13) — vertical at x=915
-  n14: {id:'n14',role:'Technical Engineer',            name:'Anand Raj',               type:'wc', x:915,  y:370,  mgr:'n13', line:'dotted'},
-  n15: {id:'n15',role:'Manager PDM & ECM Engg',       name:'Ivan Grabevac',           type:'wc', x:915,  y:510,  mgr:'n13', line:'dotted'},
-  // ── Children of Ivan (n15) — vertical at x=915 / x=1055
-  n16: {id:'n16',role:'Configuration Lead – PDM',     name:'Dharani Kumar',           type:'wc', x:915,  y:650,  mgr:'n15', line:'direct'},
-  n17: {id:'n17',role:'HydraSpecma US – MD',          name:'Jody Coleman',            type:'wc', x:915,  y:790,  mgr:'n15', line:'dotted'},
-  n19: {id:'n19',role:'Logistic Manager',              name:'Fredrik Stokholm',        type:'wc', x:1055, y:790,  mgr:'n15', line:'dotted'},
-  n18: {id:'n18',role:'Operational Buyer',             name:'Vivekraj',                type:'bc', x:915,  y:930,  mgr:'n17', line:'direct'},
-  n20: {id:'n20',role:'Operational Buyer',             name:'Balachandar',             type:'bc', x:1055, y:930,  mgr:'n19', line:'direct'},
-  // ── Children of Kumaran (n23) — horizontal spread y=370
-  n24: {id:'n24',role:'Warehouse Engineer',            name:'Perumal',                 type:'wc', x:1090, y:370,  mgr:'n23', line:'direct'},
-  n25: {id:'n25',role:'Asst Manager Quality',         name:'Arun Bharadwaj',          type:'wc', x:1265, y:370,  mgr:'n23', line:'direct'},
-  n34: {id:'n34',role:'Logistics – Asst Manager',    name:'Rajesh Kumar',             type:'wc', x:1440, y:370,  mgr:'n23', line:'direct'},
-  n46: {id:'n46',role:'Production Manager',            name:'Mohan Srinivasan',        type:'wc', x:1615, y:370,  mgr:'n23', line:'direct'},
-  // ── Children of Arun Bharadwaj (n25)
-  n26: {id:'n26',role:'Deputy Manager SQD',           name:'Surya Vaman',             type:'wc', x:1165, y:510,  mgr:'n25', line:'direct'},
-  n29: {id:'n29',role:'Fork Lift Operator',           name:'Contract Labour',          type:'cl', x:1265, y:510,  mgr:'n25', line:'direct'},
-  n30: {id:'n30',role:'Senior Quality Engineer',      name:'Arun Raja',               type:'wc', x:1340, y:510,  mgr:'n25', line:'direct'},
-  // ── Surya Vaman (n26) chain at x=1165
-  n27: {id:'n27',role:'Sr Quality Engineer',          name:'Peer Ali',                type:'wc', x:1165, y:650,  mgr:'n26', line:'direct'},
-  n28: {id:'n28',role:'Junior Technician',            name:'Sivagami',                type:'bc', x:1165, y:790,  mgr:'n27', line:'direct'},
-  // ── Arun Raja (n30) children at x=1340
-  n31: {id:'n31',role:'Quality Engineer',             name:'Venkatesan Annamalai',    type:'wc', x:1340, y:650,  mgr:'n30', line:'direct'},
-  n33: {id:'n33',role:'Fork Lift Operator',           name:'Contract QL',             type:'cl', x:1340, y:790,  mgr:'n30', line:'direct'},
-  n32: {id:'n32',role:'Jr Quality Engineer',          name:'Srinivasan',              type:'wc', x:1340, y:930,  mgr:'n31', line:'direct'},
-  // ── Prod Eng chain (n34→n35) at x=1440, Elangovan chain at x=1530
-  n35: {id:'n35',role:'Prod Eng',                     name:'Yuvaraj Gopala Krishnan', type:'wc', x:1440, y:510,  mgr:'n34', line:'direct'},
-  n36: {id:'n36',role:'Senior Technician',            name:'Elangovan',               type:'bc', x:1530, y:650,  mgr:'n35', line:'direct'},
-  n37: {id:'n37',role:'Prod Tech',                    name:'Tamil Selvan',            type:'bc', x:1530, y:790,  mgr:'n36', line:'direct'},
-  n38: {id:'n38',role:'Prod Tech',                    name:'Vignesh',                 type:'bc', x:1530, y:930,  mgr:'n37', line:'direct'},
-  n39: {id:'n39',role:'Junior Technician',            name:'Mohammed Rafiq',          type:'bc', x:1530, y:1070, mgr:'n38', line:'direct'},
-  n40: {id:'n40',role:'Junior Technician',            name:'Ms. Selvi',               type:'bc', x:1530, y:1210, mgr:'n39', line:'direct'},
-  n41: {id:'n41',role:'Diploma Trainee',              name:'Prasanth',                type:'bc', x:1530, y:1350, mgr:'n40', line:'direct'},
-  n42: {id:'n42',role:'Contract Labour',              name:'Sathishkumar',            type:'cl', x:1530, y:1490, mgr:'n41', line:'direct'},
-  n43: {id:'n43',role:'Contract Labour',              name:'Vinoth',                  type:'cl', x:1530, y:1630, mgr:'n42', line:'direct'},
-  n44: {id:'n44',role:'Contract Labour',              name:'Karusiyappan',            type:'cl', x:1530, y:1770, mgr:'n43', line:'direct'},
-  n45: {id:'n45',role:'Contract Labour',              name:'Anandhan',                type:'cl', x:1530, y:1910, mgr:'n44', line:'direct'},
-  // ── Production Manager chain at x=1615
-  n47: {id:'n47',role:'Prod & Maint Incharge',       name:'Shivashankar',            type:'wc', x:1615, y:510,  mgr:'n46', line:'direct'},
-  n48: {id:'n48',role:'Senior Technician',            name:'Prakash',                 type:'bc', x:1615, y:650,  mgr:'n47', line:'direct'},
-  n49: {id:'n49',role:'Senior Technician',            name:'Kumareson',               type:'bc', x:1615, y:790,  mgr:'n48', line:'direct'},
-  n50: {id:'n50',role:'Technician',                   name:'A Sathish',               type:'bc', x:1615, y:930,  mgr:'n49', line:'direct'},
-  n51: {id:'n51',role:'Maint Technician',             name:'Suresh Umapathy',         type:'bc', x:1615, y:1070, mgr:'n50', line:'direct'},
-  n52: {id:'n52',role:'Technician',                   name:'Sivalincar',              type:'bc', x:1615, y:1210, mgr:'n51', line:'direct'},
-  n53: {id:'n53',role:'Junior Technician',            name:'Nanthakumar',             type:'bc', x:1615, y:1350, mgr:'n52', line:'direct'},
-  n54: {id:'n54',role:'Junior Technician',            name:'Ms. Deepa',               type:'bc', x:1615, y:1490, mgr:'n53', line:'direct'},
-  n55: {id:'n55',role:'Diploma Trainee',              name:'Rajkumar',                type:'bc', x:1615, y:1630, mgr:'n54', line:'direct'},
-  n56: {id:'n56',role:'Diploma Trainee',              name:'Hemanth Kumar',           type:'bc', x:1615, y:1770, mgr:'n55', line:'direct'},
-  n57: {id:'n57',role:'Diploma Trainee',              name:'Annaswami',               type:'bc', x:1615, y:1910, mgr:'n56', line:'direct'},
-  n58: {id:'n58',role:'Diploma Trainee',              name:'V. Babu',                 type:'bc', x:1615, y:2050, mgr:'n57', line:'direct'},
-  n59: {id:'n59',role:'Contract Labour',              name:'Rajul',                   type:'cl', x:1615, y:2190, mgr:'n58', line:'direct'},
-  // ── Financial Controller chain at x=1430
-  n61: {id:'n61',role:'Accounts Manager',             name:'Karumanthi Sundaram',     type:'wc', x:1430, y:370,  mgr:'n60', line:'direct'},
-  n62: {id:'n62',role:'Accounting Asst',              name:'Vasanth Kumar',           type:'wc', x:1430, y:510,  mgr:'n61', line:'direct'}
+  "n1": {
+    "id": "n1",
+    "role": "Head of Operations",
+    "name": "Simon Steen Kristensen",
+    "type": "gs",
+    "x": 20,
+    "y": 20,
+    "mgr": null,
+    "line": "direct"
+  },
+  "n2": {
+    "id": "n2",
+    "role": "Procurement Global Head",
+    "name": "Christian Evers",
+    "type": "gc",
+    "x": 20,
+    "y": 175,
+    "mgr": "n1",
+    "line": "dotted"
+  },
+  "n7": {
+    "id": "n7",
+    "role": "Customer Service Global Head",
+    "name": "Brian Vind Jensen",
+    "type": "gc",
+    "x": 188,
+    "y": 175,
+    "mgr": "n1",
+    "line": "dotted"
+  },
+  "n63": {
+    "id": "n63",
+    "role": "Quality Global Head",
+    "name": "Robert Kaleta",
+    "type": "gc",
+    "x": 356,
+    "y": 175,
+    "mgr": "n1",
+    "line": "dotted"
+  },
+  "n64": {
+    "id": "n64",
+    "role": "Finance Global Head",
+    "name": "Thomas Aarup Christensen",
+    "type": "gc",
+    "x": 524,
+    "y": 175,
+    "mgr": "n1",
+    "line": "dotted"
+  },
+  "n12": {
+    "id": "n12",
+    "role": "Country Manager — India",
+    "name": "Babu Parthasarathy",
+    "type": "wc",
+    "x": 692,
+    "y": 175,
+    "mgr": "n1",
+    "line": "direct"
+  },
+  "n3": {
+    "id": "n3",
+    "role": "Procurement Lead",
+    "name": "Prabhu",
+    "type": "wc",
+    "x": 20,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct",
+    "dualMgr": "n2",
+    "dualLine": "dotted"
+  },
+  "n8": {
+    "id": "n8",
+    "role": "Customer Service",
+    "name": "Dinesh Kumar Singh",
+    "type": "wc",
+    "x": 188,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct",
+    "dualMgr": "n7",
+    "dualLine": "dotted"
+  },
+  "n21": {
+    "id": "n21",
+    "role": "People & Culture",
+    "name": "Suresh Kumar",
+    "type": "wc",
+    "x": 356,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct"
+  },
+  "n22": {
+    "id": "n22",
+    "role": "Dynamic App Specialist – IT",
+    "name": "Manigandan",
+    "type": "wc",
+    "x": 524,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct"
+  },
+  "n13": {
+    "id": "n13",
+    "role": "Manager Lubrication, R&D",
+    "name": "Kasper Nissen",
+    "type": "wc",
+    "x": 692,
+    "y": 330,
+    "mgr": "n12",
+    "line": "dotted"
+  },
+  "n23": {
+    "id": "n23",
+    "role": "Operations Manager & QEHS",
+    "name": "Kumaran",
+    "type": "wc",
+    "x": 860,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct"
+  },
+  "n60": {
+    "id": "n60",
+    "role": "Financial Controller",
+    "name": "Balaji Jayaram",
+    "type": "wc",
+    "x": 1028,
+    "y": 330,
+    "mgr": "n12",
+    "line": "direct",
+    "dualMgr": "n64",
+    "dualLine": "dotted"
+  },
+  "n4": {
+    "id": "n4",
+    "role": "Senior Engineer Purchase",
+    "name": "Dharani Kumar",
+    "type": "wc",
+    "x": 20,
+    "y": 485,
+    "mgr": "n3",
+    "line": "direct"
+  },
+  "n5": {
+    "id": "n5",
+    "role": "Asst Manager (NPD)",
+    "name": "Vignesh",
+    "type": "wc",
+    "x": 188,
+    "y": 485,
+    "mgr": "n3",
+    "line": "direct"
+  },
+  "n6": {
+    "id": "n6",
+    "role": "Asst Manager Sourcing & VD",
+    "name": "Prakash",
+    "type": "wc",
+    "x": 356,
+    "y": 485,
+    "mgr": "n3",
+    "line": "direct"
+  },
+  "n9": {
+    "id": "n9",
+    "role": "Sales Coordinator",
+    "name": "Janki Basu",
+    "type": "wc",
+    "x": 524,
+    "y": 485,
+    "mgr": "n8",
+    "line": "direct"
+  },
+  "n11": {
+    "id": "n11",
+    "role": "Office Asst Admin",
+    "name": "Ms. Usha",
+    "type": "wc",
+    "x": 692,
+    "y": 485,
+    "mgr": "n8",
+    "line": "direct"
+  },
+  "n10": {
+    "id": "n10",
+    "role": "Sales",
+    "name": "Lokesh / Trainee",
+    "type": "bc",
+    "x": 20,
+    "y": 640,
+    "mgr": "n9",
+    "line": "direct"
+  },
+  "n14": {
+    "id": "n14",
+    "role": "Technical Engineer",
+    "name": "Anand Raj",
+    "type": "wc",
+    "x": 860,
+    "y": 485,
+    "mgr": "n13",
+    "line": "dotted"
+  },
+  "n15": {
+    "id": "n15",
+    "role": "Manager PDM & ECM Engg",
+    "name": "Ivan Grabevac",
+    "type": "wc",
+    "x": 1028,
+    "y": 485,
+    "mgr": "n13",
+    "line": "dotted"
+  },
+  "n16": {
+    "id": "n16",
+    "role": "Configuration Lead – PDM",
+    "name": "Dharani Kumar",
+    "type": "wc",
+    "x": 188,
+    "y": 640,
+    "mgr": "n15",
+    "line": "direct"
+  },
+  "n17": {
+    "id": "n17",
+    "role": "HydraSpecma US – MD",
+    "name": "Jody Coleman",
+    "type": "wc",
+    "x": 356,
+    "y": 640,
+    "mgr": "n15",
+    "line": "dotted"
+  },
+  "n19": {
+    "id": "n19",
+    "role": "Logistic Manager",
+    "name": "Fredrik Stokholm",
+    "type": "wc",
+    "x": 524,
+    "y": 640,
+    "mgr": "n15",
+    "line": "dotted"
+  },
+  "n18": {
+    "id": "n18",
+    "role": "Operational Buyer",
+    "name": "Vivekraj",
+    "type": "bc",
+    "x": 20,
+    "y": 795,
+    "mgr": "n17",
+    "line": "direct"
+  },
+  "n20": {
+    "id": "n20",
+    "role": "Operational Buyer",
+    "name": "Balachandar",
+    "type": "bc",
+    "x": 188,
+    "y": 795,
+    "mgr": "n19",
+    "line": "direct"
+  },
+  "n24": {
+    "id": "n24",
+    "role": "Warehouse Engineer",
+    "name": "Perumal",
+    "type": "wc",
+    "x": 1196,
+    "y": 485,
+    "mgr": "n23",
+    "line": "direct"
+  },
+  "n25": {
+    "id": "n25",
+    "role": "Asst Manager Quality",
+    "name": "Arun Bharadwaj",
+    "type": "wc",
+    "x": 1364,
+    "y": 485,
+    "mgr": "n23",
+    "line": "direct"
+  },
+  "n34": {
+    "id": "n34",
+    "role": "Logistics – Asst Manager",
+    "name": "Rajesh Kumar",
+    "type": "wc",
+    "x": 1532,
+    "y": 485,
+    "mgr": "n23",
+    "line": "direct"
+  },
+  "n46": {
+    "id": "n46",
+    "role": "Production Manager",
+    "name": "Mohan Srinivasan",
+    "type": "wc",
+    "x": 1700,
+    "y": 485,
+    "mgr": "n23",
+    "line": "direct"
+  },
+  "n26": {
+    "id": "n26",
+    "role": "Deputy Manager SQD",
+    "name": "Surya Vaman",
+    "type": "wc",
+    "x": 692,
+    "y": 640,
+    "mgr": "n25",
+    "line": "direct"
+  },
+  "n29": {
+    "id": "n29",
+    "role": "Fork Lift Operator",
+    "name": "Contract Labour",
+    "type": "cl",
+    "x": 860,
+    "y": 640,
+    "mgr": "n25",
+    "line": "direct"
+  },
+  "n30": {
+    "id": "n30",
+    "role": "Senior Quality Engineer",
+    "name": "Arun Raja",
+    "type": "wc",
+    "x": 1028,
+    "y": 640,
+    "mgr": "n25",
+    "line": "direct"
+  },
+  "n27": {
+    "id": "n27",
+    "role": "Sr Quality Engineer",
+    "name": "Peer Ali",
+    "type": "wc",
+    "x": 356,
+    "y": 795,
+    "mgr": "n26",
+    "line": "direct"
+  },
+  "n28": {
+    "id": "n28",
+    "role": "Junior Technician",
+    "name": "Sivagami",
+    "type": "bc",
+    "x": 20,
+    "y": 950,
+    "mgr": "n27",
+    "line": "direct"
+  },
+  "n31": {
+    "id": "n31",
+    "role": "Quality Engineer",
+    "name": "Venkatesan Annamalai",
+    "type": "wc",
+    "x": 524,
+    "y": 795,
+    "mgr": "n30",
+    "line": "direct"
+  },
+  "n33": {
+    "id": "n33",
+    "role": "Fork Lift Operator",
+    "name": "Contract QL",
+    "type": "cl",
+    "x": 692,
+    "y": 795,
+    "mgr": "n30",
+    "line": "direct"
+  },
+  "n32": {
+    "id": "n32",
+    "role": "Jr Quality Engineer",
+    "name": "Srinivasan",
+    "type": "wc",
+    "x": 188,
+    "y": 950,
+    "mgr": "n31",
+    "line": "direct"
+  },
+  "n35": {
+    "id": "n35",
+    "role": "Prod Eng",
+    "name": "Yuvaraj Gopala Krishnan",
+    "type": "wc",
+    "x": 1196,
+    "y": 640,
+    "mgr": "n34",
+    "line": "direct"
+  },
+  "n36": {
+    "id": "n36",
+    "role": "Senior Technician",
+    "name": "Elangovan",
+    "type": "bc",
+    "x": 860,
+    "y": 795,
+    "mgr": "n35",
+    "line": "direct"
+  },
+  "n37": {
+    "id": "n37",
+    "role": "Prod Tech",
+    "name": "Tamil Selvan",
+    "type": "bc",
+    "x": 356,
+    "y": 950,
+    "mgr": "n36",
+    "line": "direct"
+  },
+  "n38": {
+    "id": "n38",
+    "role": "Prod Tech",
+    "name": "Vignesh",
+    "type": "bc",
+    "x": 20,
+    "y": 1105,
+    "mgr": "n37",
+    "line": "direct"
+  },
+  "n39": {
+    "id": "n39",
+    "role": "Junior Technician",
+    "name": "Mohammed Rafiq",
+    "type": "bc",
+    "x": 20,
+    "y": 1260,
+    "mgr": "n38",
+    "line": "direct"
+  },
+  "n40": {
+    "id": "n40",
+    "role": "Junior Technician",
+    "name": "Ms. Selvi",
+    "type": "bc",
+    "x": 20,
+    "y": 1415,
+    "mgr": "n39",
+    "line": "direct"
+  },
+  "n41": {
+    "id": "n41",
+    "role": "Diploma Trainee",
+    "name": "Prasanth",
+    "type": "bc",
+    "x": 20,
+    "y": 1570,
+    "mgr": "n40",
+    "line": "direct"
+  },
+  "n42": {
+    "id": "n42",
+    "role": "Contract Labour",
+    "name": "Sathishkumar",
+    "type": "cl",
+    "x": 20,
+    "y": 1725,
+    "mgr": "n41",
+    "line": "direct"
+  },
+  "n43": {
+    "id": "n43",
+    "role": "Contract Labour",
+    "name": "Vinoth",
+    "type": "cl",
+    "x": 20,
+    "y": 1880,
+    "mgr": "n42",
+    "line": "direct"
+  },
+  "n44": {
+    "id": "n44",
+    "role": "Contract Labour",
+    "name": "Karusiyappan",
+    "type": "cl",
+    "x": 20,
+    "y": 2035,
+    "mgr": "n43",
+    "line": "direct"
+  },
+  "n45": {
+    "id": "n45",
+    "role": "Contract Labour",
+    "name": "Anandhan",
+    "type": "cl",
+    "x": 20,
+    "y": 2190,
+    "mgr": "n44",
+    "line": "direct"
+  },
+  "n47": {
+    "id": "n47",
+    "role": "Prod & Maint Incharge",
+    "name": "Shivashankar",
+    "type": "wc",
+    "x": 1364,
+    "y": 640,
+    "mgr": "n46",
+    "line": "direct"
+  },
+  "n48": {
+    "id": "n48",
+    "role": "Senior Technician",
+    "name": "Prakash",
+    "type": "bc",
+    "x": 1028,
+    "y": 795,
+    "mgr": "n47",
+    "line": "direct"
+  },
+  "n49": {
+    "id": "n49",
+    "role": "Senior Technician",
+    "name": "Kumareson",
+    "type": "bc",
+    "x": 524,
+    "y": 950,
+    "mgr": "n48",
+    "line": "direct"
+  },
+  "n50": {
+    "id": "n50",
+    "role": "Technician",
+    "name": "A Sathish",
+    "type": "bc",
+    "x": 188,
+    "y": 1105,
+    "mgr": "n49",
+    "line": "direct"
+  },
+  "n51": {
+    "id": "n51",
+    "role": "Maint Technician",
+    "name": "Suresh Umapathy",
+    "type": "bc",
+    "x": 188,
+    "y": 1260,
+    "mgr": "n50",
+    "line": "direct"
+  },
+  "n52": {
+    "id": "n52",
+    "role": "Technician",
+    "name": "Sivalincar",
+    "type": "bc",
+    "x": 188,
+    "y": 1415,
+    "mgr": "n51",
+    "line": "direct"
+  },
+  "n53": {
+    "id": "n53",
+    "role": "Junior Technician",
+    "name": "Nanthakumar",
+    "type": "bc",
+    "x": 188,
+    "y": 1570,
+    "mgr": "n52",
+    "line": "direct"
+  },
+  "n54": {
+    "id": "n54",
+    "role": "Junior Technician",
+    "name": "Ms. Deepa",
+    "type": "bc",
+    "x": 188,
+    "y": 1725,
+    "mgr": "n53",
+    "line": "direct"
+  },
+  "n55": {
+    "id": "n55",
+    "role": "Diploma Trainee",
+    "name": "Rajkumar",
+    "type": "bc",
+    "x": 188,
+    "y": 1880,
+    "mgr": "n54",
+    "line": "direct"
+  },
+  "n56": {
+    "id": "n56",
+    "role": "Diploma Trainee",
+    "name": "Hemanth Kumar",
+    "type": "bc",
+    "x": 188,
+    "y": 2035,
+    "mgr": "n55",
+    "line": "direct"
+  },
+  "n57": {
+    "id": "n57",
+    "role": "Diploma Trainee",
+    "name": "Annaswami",
+    "type": "bc",
+    "x": 188,
+    "y": 2190,
+    "mgr": "n56",
+    "line": "direct"
+  },
+  "n58": {
+    "id": "n58",
+    "role": "Diploma Trainee",
+    "name": "V. Babu",
+    "type": "bc",
+    "x": 20,
+    "y": 2345,
+    "mgr": "n57",
+    "line": "direct"
+  },
+  "n59": {
+    "id": "n59",
+    "role": "Contract Labour",
+    "name": "Rajul",
+    "type": "cl",
+    "x": 20,
+    "y": 2500,
+    "mgr": "n58",
+    "line": "direct"
+  },
+  "n61": {
+    "id": "n61",
+    "role": "Accounts Manager",
+    "name": "Karumanthi Sundaram",
+    "type": "wc",
+    "x": 1868,
+    "y": 485,
+    "mgr": "n60",
+    "line": "direct"
+  },
+  "n62": {
+    "id": "n62",
+    "role": "Accounting Asst",
+    "name": "Vasanth Kumar",
+    "type": "wc",
+    "x": 1532,
+    "y": 640,
+    "mgr": "n61",
+    "line": "direct"
+  }
 };
 
 // Deep-clone helper
