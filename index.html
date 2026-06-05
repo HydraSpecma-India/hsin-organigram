@@ -914,9 +914,7 @@ const ADMIN_NODES = {
     "x": 1001.949951171875,
     "y": 258.9375,
     "mgr": "n12",
-    "line": "direct",
-    "email": "",
-    "avatar": "image/n22.jpg"
+    "line": "direct"
   },
   "n13": {
     "id": "n13",
@@ -1628,50 +1626,71 @@ async function pushToGithub() {
       'Content-Type': 'application/json'
     };
 
-    // Step 0 — upload base64 images to image/ folder
+    // Step 0 — upload base64 images to image/ folder and rename using employee name
     const base64Marker = ';base64,';
     const nodesList = Object.values(nodes);
+
+    async function uploadImageToGithub(path, rawBase64, name) {
+      ghStatus(`🔄 Uploading image for ${name} to GitHub…`, 'info');
+      const imgApiUrl = encodeURI(`https://api.github.com/repos/${user}/${repo}/contents/${path}`);
+      let imgSha = null;
+      try {
+        const getImg = await fetch(`${imgApiUrl}?ref=${branch}`, { headers });
+        if (getImg.ok) {
+          const getImgData = await getImg.json();
+          imgSha = getImgData.sha;
+        }
+      } catch (e) {}
+      
+      const imgBody = {
+        message: `Upload avatar for ${name}`,
+        content: rawBase64,
+        branch
+      };
+      if (imgSha) imgBody.sha = imgSha;
+      
+      const putImg = await fetch(imgApiUrl, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(imgBody)
+      });
+      
+      if (!putImg.ok) {
+        const e = await putImg.json();
+        throw new Error(`Failed to upload image for ${name}: ${e.message || putImg.status}`);
+      }
+    }
+
     for (let i = 0; i < nodesList.length; i++) {
       const n = nodesList[i];
       if (n.avatar && n.avatar.startsWith('images/')) {
         n.avatar = n.avatar.replace(/^images\//, 'image/');
       }
-      if (n.avatar && n.avatar.startsWith('data:') && n.avatar.includes(base64Marker)) {
+      if (!n.avatar || !n.name) continue;
+      
+      const cleanName = n.name.trim().replace(/[^a-zA-Z0-9 _-]/g, '');
+      const targetPath = `image/${cleanName}.jpg`;
+      
+      if (n.avatar.startsWith('data:') && n.avatar.includes(base64Marker)) {
         const parts = n.avatar.split(base64Marker);
         const rawBase64 = parts[1];
-        const imagePath = `image/${n.id}.jpg`;
-        
-        ghStatus(`🔄 Uploading image for ${n.name} to GitHub…`, 'info');
-        const imgApiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${imagePath}`;
-        
-        let imgSha = null;
+        await uploadImageToGithub(targetPath, rawBase64, n.name);
+        n.avatar = targetPath;
+      } else if (!n.avatar.startsWith('data:') && n.avatar !== targetPath) {
+        // If it's a relative path that doesn't match the new cleaned name pattern (e.g. legacy n.id pattern or renamed employee)
+        ghStatus(`🔄 Migrating image for ${n.name} to new name on GitHub…`, 'info');
         try {
-          const getImg = await fetch(`${imgApiUrl}?ref=${branch}`, { headers });
-          if (getImg.ok) {
-            const getImgData = await getImg.json();
-            imgSha = getImgData.sha;
+          const oldApiUrl = encodeURI(`https://api.github.com/repos/${user}/${repo}/contents/${n.avatar}?ref=${branch}`);
+          const getOld = await fetch(oldApiUrl, { headers });
+          if (getOld.ok) {
+            const oldData = await getOld.json();
+            const rawBase64 = oldData.content.replace(/\n/g, '');
+            await uploadImageToGithub(targetPath, rawBase64, n.name);
+            n.avatar = targetPath;
           }
-        } catch (e) {}
-        
-        const imgBody = {
-          message: `Upload avatar for ${n.name}`,
-          content: rawBase64,
-          branch
-        };
-        if (imgSha) imgBody.sha = imgSha;
-        
-        const putImg = await fetch(imgApiUrl, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(imgBody)
-        });
-        
-        if (!putImg.ok) {
-          const e = await putImg.json();
-          throw new Error(`Failed to upload image for ${n.name}: ${e.message || putImg.status}`);
+        } catch (err) {
+          console.warn(`Failed to migrate image for ${n.name}:`, err);
         }
-        
-        n.avatar = imagePath;
       }
     }
     saveAll();
