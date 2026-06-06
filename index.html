@@ -722,19 +722,24 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     display: none !important;
   }
   .chart-view {
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 0 !important;
     margin: 0 !important;
     flex: 1 !important;
     position: relative !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
   }
   .canvas-wrap {
     overflow: visible !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
     background: #ffffff !important;
     padding: 0 !important;
+    margin: auto !important;
   }
   .node {
     background: #ffffff !important;
@@ -792,7 +797,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
   <div class="hdr-info">
     <div class="hdr-title">HydraSpecma India — Organigram</div>
-    <div class="hdr-sub">HSIN &nbsp;·&nbsp; <span id="displayDate">09-01-2026</span></div>
+    <div class="hdr-sub">HSIN &nbsp;·&nbsp; <span id="displayDate">05-June-2026</span></div>
   </div>
   <div class="hdr-right">
     <button class="date-btn" id="dateBtn" onclick="openDateModal()" title="Change date">📅 Change Date</button>
@@ -850,31 +855,31 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 </div>
 
 <!-- CHART VIEW -->
-<div class="chart-view active" id="chartView">
+<div class="chart-view active" id="chartView" style="position: relative;">
   <div class="canvas-wrap" id="canvasWrap">
     <svg id="connSvg"></svg>
     <div class="global-col-divider"></div>
     <div class="global-col-label">Global Team</div>
-    <div class="side-panel" id="globalPanel" style="min-width: 220px;">
-      <h4>👥 Directory</h4>
-      <div class="side-tabs">
-        <button class="side-tab active" id="tab-gs" onclick="switchDirectoryTab('gs')">Global</button>
-        <button class="side-tab" id="tab-wc" onclick="switchDirectoryTab('wc')">White</button>
-        <button class="side-tab" id="tab-bc" onclick="switchDirectoryTab('bc')">Blue</button>
-        <button class="side-tab" id="tab-cl" onclick="switchDirectoryTab('cl')">Contract</button>
-      </div>
-      <select id="dirManagerFilter" class="dir-select" onchange="onDirManagerChange()">
-        <option value="all">🔍 Filter by Manager: All</option>
-      </select>
-      <div class="highlight-mode-toggle" style="margin-bottom: 0;">
-        <div class="side-tabs" style="margin-bottom: 0;">
-          <button class="side-tab active" id="hl-mode-mgr" onclick="setHighlightMode('manager')" style="font-size: 0.53rem; padding: 3px 0;" title="Click employee to highlight manager">Show Manager</button>
-          <button class="side-tab" id="hl-mode-rep" onclick="setHighlightMode('reports')" style="font-size: 0.53rem; padding: 3px 0;" title="Click manager to highlight reports">Show Reports</button>
-        </div>
+  </div>
+  <div class="side-panel" id="globalPanel" style="min-width: 220px;">
+    <h4>👥 Directory</h4>
+    <div class="side-tabs">
+      <button class="side-tab active" id="tab-gs" onclick="switchDirectoryTab('gs')">Global</button>
+      <button class="side-tab" id="tab-wc" onclick="switchDirectoryTab('wc')">White</button>
+      <button class="side-tab" id="tab-bc" onclick="switchDirectoryTab('bc')">Blue</button>
+      <button class="side-tab" id="tab-cl" onclick="switchDirectoryTab('cl')">Contract</button>
+    </div>
+    <select id="dirManagerFilter" class="dir-select" onchange="onDirManagerChange()">
+      <option value="all">🔍 Filter by Manager: All</option>
+    </select>
+    <div class="highlight-mode-toggle" style="margin-bottom: 0;">
+      <div class="side-tabs" style="margin-bottom: 0;">
+        <button class="side-tab active" id="hl-mode-mgr" onclick="setHighlightMode('manager')" style="font-size: 0.53rem; padding: 3px 0;" title="Click employee to highlight manager">Show Manager</button>
+        <button class="side-tab" id="hl-mode-rep" onclick="setHighlightMode('reports')" style="font-size: 0.53rem; padding: 3px 0;" title="Click manager to highlight reports">Show Reports</button>
       </div>
     </div>
-    <div class="nm-panel" id="nmPanel" style="display:none"><h4>👤 No Manager</h4><div id="nmList"></div></div>
   </div>
+  <div class="nm-panel" id="nmPanel" style="display:none"><h4>👤 No Manager</h4><div id="nmList"></div></div>
 </div>
 
 <!-- TABLE VIEW -->
@@ -1963,10 +1968,11 @@ function loadAdminLayout() {
     const d   = localStorage.getItem(LS_DATE);
     if (raw) {
       const p = JSON.parse(raw);
-      if (p && p.n1) {
+      if (p && Object.keys(p).length > 0) {
         if (d) currentDate = d;
         nodes = p;
-        // Migrate legacy images/ paths to image/
+        updateMaxId();
+// Migrate legacy images/ paths to image/
         Object.values(nodes).forEach(n => {
           if (n.avatar && n.avatar.startsWith('images/')) {
             n.avatar = n.avatar.replace(/^images\//, 'image/');
@@ -1987,6 +1993,7 @@ function resetToDefault() {
   localStorage.removeItem('hsin_divider_x_v8');
   globalDividerX = 196;
   nodes = deepClone(ADMIN_NODES);
+  updateMaxId();
   currentDate = '09-01-2026';
   const dd = document.getElementById('displayDate');
   if(dd) dd.textContent = currentDate;
@@ -2229,9 +2236,27 @@ async function pushToGithub() {
 }
 
 // ── Initialise nodes from localStorage or factory defaults
+let _idc = 500;
+const newId = () => 'n' + (++_idc);
+function updateMaxId() {
+  let maxVal = 500;
+  if (typeof nodes !== 'undefined' && nodes) {
+    Object.keys(nodes).forEach(id => {
+      if (id.startsWith('n')) {
+        const num = parseInt(id.slice(1), 10);
+        if (!isNaN(num) && num > maxVal) {
+          maxVal = num;
+        }
+      }
+    });
+  }
+  _idc = maxVal;
+}
+
 let nodes = {};
 if(!loadAdminLayout()){
   nodes = deepClone(ADMIN_NODES);
+  updateMaxId();
 }
 
 // ════════════════════════════════
@@ -2243,8 +2268,9 @@ let editingId=null, selMgrId=null, selMgr2Id=null, moveSourceId=null, noMgrSel=f
 let mgrFIdx=-1, mgrFIdx2=-1;
 let tvEditingId=null;
 let importRows=[];
-let _idc=500;
-const newId=()=>'n'+(++_idc);
+
+
+
 const collapsed=new Set();
 let mgrList=[];
 let currentDate='09-01-2026';
@@ -2282,13 +2308,16 @@ async function submitLock(){
   }
   isLocked=!isLocked;
   closeLockModal();
-  if(isLocked){
+  if (isLocked) {
     // RESTORE admin layout on lock
-    nodes=deepClone(ADMIN_NODES);
+    if (!loadAdminLayout()) {
+      nodes = deepClone(ADMIN_NODES);
+      updateMaxId();
+    }
     collapsed.clear();
   }
   applyLockState();
-  toast(isLocked?'🔒 Locked — layout restored to admin default':'🔓 Editing unlocked');
+  toast(isLocked?'🔒 Locked':'🔓 Editing unlocked');
 }
 function closeLockModal(){document.getElementById('lockModal').style.display='none';}
 function applyLockState(){
@@ -2919,7 +2948,7 @@ function printChart() {
         width: ${chartWidth + 40}px !important;
         height: ${chartHeight + 40}px !important;
         transform: scale(${scale}) translate(${offsetX}px, ${offsetY}px) !important;
-        transform-origin: top left !important;
+        transform-origin: center center !important;
       }
     }
   `;
@@ -3491,18 +3520,18 @@ function openEdit(id){
 function openAddModal(){
   if(isLocked)return;
   const n={id:newId(),role:'New Role',name:'New Person',type:'wc',x:200,y:200,mgr:null,line:'direct'};
-  nodes[n.id]=n;render();openEdit(n.id);
+  nodes[n.id]=n;saveAll();render();openEdit(n.id);
 }
 function quickAddChild(pid){
   if(isLocked)return;
   const par=nodes[pid];
   const n={id:newId(),role:'New Role',name:'New Person',type:par.type,x:par.x,y:par.y+160,mgr:pid,line:'direct'};
-  nodes[n.id]=n;render();openEdit(n.id);toast('Child node added');
+  nodes[n.id]=n;saveAll();render();openEdit(n.id);toast('Child node added');
 }
 function addChildFromModal(){
   const par=nodes[editingId];if(!par)return;
   const n={id:newId(),role:'New Role',name:'New Person',type:par.type,x:par.x,y:par.y+170,mgr:editingId,line:'direct'};
-  nodes[n.id]=n;closeModal();render();setTimeout(()=>openEdit(n.id),80);
+  nodes[n.id]=n;saveAll();closeModal();render();setTimeout(()=>openEdit(n.id),80);
 }
 function closeModal(){
   document.getElementById('editModal').style.display='none';
@@ -3539,7 +3568,7 @@ function deleteNode(){
   const n=nodes[editingId];if(!n)return;
   if(!confirm(`Delete "${n.name}"? Their direct reports will be unassigned.`))return;
   Object.values(nodes).forEach(x=>{if(x.mgr===editingId)x.mgr=null;});
-  delete nodes[editingId];closeModal();
+  delete nodes[editingId];saveAll();closeModal();
   if(currentView==='chart')render();else renderTable();toast('Deleted');
 }
 function toggleDualF(){document.getElementById('dualFields').style.display=document.getElementById('dualCheck').checked?'block':'none';}
@@ -3708,7 +3737,7 @@ function tvSave(id){
 function tvDel(id){
   if(!confirm('Delete "'+nodes[id].name+'"?'))return;
   Object.values(nodes).forEach(x=>{if(x.mgr===id)x.mgr=null;});
-  delete nodes[id];tvEditingId=null;renderTable();toast('Deleted');
+  delete nodes[id];saveAll();tvEditingId=null;renderTable();toast('Deleted');
 }
 function tvAdd(){
   const name=document.getElementById('tvAN').value.trim();
@@ -3717,7 +3746,7 @@ function tvAdd(){
   if(!name&&!role){toast('Enter name or role','err');return;}
   const mgr=document.getElementById('tvAM').value||null;
   const n={id:newId(),role:role||'New Role',name:name||'New Person',email,type:document.getElementById('tvAT').value,x:200,y:200,mgr,line:'direct'};
-  nodes[n.id]=n;renderTable();toast('Added ✓');
+  nodes[n.id]=n;saveAll();renderTable();toast('Added ✓');
 }
 
 // ════════════════════════════════
@@ -3860,6 +3889,8 @@ function applyImport(){
     if(r.dualMgrName){const dId=nameMap[r.dualMgrName.toLowerCase()];if(dId){nodes[id].dualMgr=dId;nodes[id].dualLine='dotted';}}
   });
   closeImportModal();
+  updateMaxId();
+  saveAll();
   if(currentView==='chart')render();else renderTable();
   toast(`✅ Imported ${importRows.length} rows`,'info');
   importRows=[];
