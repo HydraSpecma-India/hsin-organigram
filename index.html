@@ -227,6 +227,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   padding: 14px 8px 14px 42px !important;
   text-align: left !important;
 }
+.node.selected {
+  outline: 3px solid #00e676 !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 25px rgba(0, 230, 118, 0.85) !important;
+  z-index: 450 !important;
+}
 .node-info {
   flex: 1;
   min-width: 0;
@@ -280,7 +286,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .global-col-divider{
   position:absolute;left:196px;top:0;bottom:0;
   width:2px;background:linear-gradient(to bottom,rgba(255,214,0,.5),rgba(255,214,0,.08));
-  pointer-events:none;z-index:5;
+  pointer-events:auto;z-index:5;
+  cursor:col-resize;
+}
+.global-col-divider::after {
+  content:'';position:absolute;top:0;bottom:0;left:-6px;width:14px;
+  background:transparent;cursor:col-resize;
 }
 .global-col-label{
   position:absolute;left:4px;top:0;
@@ -351,6 +362,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 @keyframes bannerIn{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
 .move-banner button{padding:3px 9px;border-radius:18px;border:none;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:.68rem;font-weight:600}
 .move-banner button:hover{background:rgba(255,255,255,.34)}
+
+/* selection banner */
+.selection-banner{position:fixed;bottom:108px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:9px 18px;border-radius:28px;
+  font-size:.74rem;font-weight:600;z-index:600;box-shadow:0 8px 28px rgba(27,94,32,.5);
+  display:flex;align-items:center;gap:9px;animation:bannerIn .3s cubic-bezier(.34,1.56,.64,1);}
+.selection-banner button{padding:3px 9px;border-radius:18px;border:none;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:.68rem;font-weight:600}
+.selection-banner button:hover{background:rgba(255,255,255,.34)}
 
 /* TABLE VIEW */
 .table-view{display:none}.table-view.active{display:block;padding:18px 18px 120px;min-height:calc(100vh - 140px)}
@@ -486,6 +505,60 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 @keyframes tIn{0%{opacity:0;transform:translateX(28px)}100%{opacity:1;transform:none}}
 .toast.err{background:#b71c1c}
 .toast.info{background:#0d47a1}
+
+/* Hover Stacking & Text Layering Overrides */
+
+
+/* VIP Leader Styling Overrides */
+#nd_n2, #nd_n12 {
+  background: linear-gradient(135deg, #101c2b 0%, #292003 100%) !important;
+  border-color: #FFD600 !important;
+  box-shadow: 0 4px 0 #b58700, 0 10px 28px rgba(255, 214, 0, 0.35), inset 0 1px 1px rgba(255,255,255,0.18) !important;
+  --3d-color: #b58700;
+}
+#nd_n2:hover, #nd_n12:hover {
+  box-shadow: 0 8px 0 #b58700, 0 16px 36px rgba(255, 214, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.22) !important;
+}
+#nd_n2 .name, #nd_n12 .name {
+  color: #ffab00 !important;
+  font-weight: 800;
+}
+/* Rich Info Tooltips Styles */
+.hs-tooltip {
+  background: rgba(15, 25, 35, 0.96);
+  border: 1.5px solid #FFD600;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.15);
+  max-width: 280px;
+  line-height: 1.45;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: scale(0.95);
+  opacity: 0;
+}
+.hs-tooltip.show {
+  opacity: 1;
+  transform: scale(1);
+}
+.node:hover {
+  z-index: 500 !important;
+}
+.node .role,
+.node .name,
+.node .count-badge,
+.node .dual-badge,
+.node .nomgr-badge {
+  position: relative;
+  z-index: 15;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.85), 0 0 2px rgba(0,0,0,1);
+}
+.node:hover .node-avatar,
+.node.dragging .node-avatar {
+  z-index: 12 !important;
+}
 </style>
 </head>
 <body>
@@ -532,6 +605,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <button class="abtn" onclick="expandAll()">⊞ Expand All</button>
     <button class="abtn red" onclick="collapseAll()">⊟ Collapse All</button>
     <button class="abtn yellow" id="btnAdd" onclick="openAddModal()">＋ Add</button>
+    <button class="abtn" id="btnMultiSelect" style="border-color:#ab47bc;color:#ce93d8" onclick="toggleMultiSelectMode()">☑ Multi-Select</button>
     <button class="abtn purple" onclick="toggleNmPanel()">👤 No Mgr</button>
     <button class="abtn" style="border-color:#26c6da;color:#80deea" id="btnSaveLayout" onclick="saveAdminLayout()">💾 Save Layout</button>
     <button class="abtn" style="border-color:#ef5350;color:#ef9a9a" id="btnReset" onclick="resetToDefault()">↺ Reset Layout</button>
@@ -603,6 +677,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
 </div>
 
+<!-- SELECTION BANNER -->
+<div class="selection-banner" id="selectionBanner" style="display:none">
+  <span id="selectionBannerText">Selected: 0 employees. Drag any to move them together.</span>
+  <button onclick="clearSelection()">✕ Clear</button>
+</div>
+
 <!-- MOVE BANNER -->
 <div class="move-banner" id="moveBanner" style="display:none">
   <span id="moveBannerText">Click a node to set as new manager</span>
@@ -611,6 +691,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 <!-- SUMMARY -->
 <div class="summary" id="summaryBar"></div>
+<!-- TOOLTIP -->
+<div id="hsTooltip" class="hs-tooltip" style="display:none; position:fixed; z-index:1000; pointer-events:none;"></div>
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal" style="display:none" onclick="if(event.target===this)closeModal()">
@@ -1605,6 +1687,7 @@ function saveAll() {
   try {
     localStorage.setItem(LS_NODES, JSON.stringify(nodes));
     localStorage.setItem(LS_DATE,  currentDate);
+    localStorage.setItem('hsin_divider_x_v8', globalDividerX);
     showSaveBadge();
   } catch(e) { console.warn('Save failed:', e); }
 }
@@ -1614,6 +1697,8 @@ function saveLayout()      { saveAll(); }
 
 function loadAdminLayout() {
   try {
+    const divX = localStorage.getItem('hsin_divider_x_v8');
+    if (divX) globalDividerX = parseInt(divX, 10) || 196;
     const raw = localStorage.getItem(LS_NODES);
     const d   = localStorage.getItem(LS_DATE);
     if (raw) {
@@ -1639,6 +1724,8 @@ function resetToDefault() {
   if (!confirm('Reset ALL data to original? All edits will be lost.')) return;
   localStorage.removeItem(LS_NODES);
   localStorage.removeItem(LS_DATE);
+  localStorage.removeItem('hsin_divider_x_v8');
+  globalDividerX = 196;
   nodes = deepClone(ADMIN_NODES);
   currentDate = '09-01-2026';
   const dd = document.getElementById('displayDate');
@@ -1719,6 +1806,17 @@ function bakeNodesToHtml(sourceHtml) {
     `$1${currentDate}`
   );
 
+  // Update divider position in script
+  updated = updated.replace(
+    /let globalDividerX\\s*=\\s*\\d+;/,
+    `let globalDividerX = ${globalDividerX};`
+  );
+
+  // Update divider position in CSS
+  updated = updated.replace(
+    /(\\.global-col-divider\\s*\\{\\s*position:\\s*absolute;\\s*left:\\s*)\\d+(px;)/,
+    `$1${globalDividerX}$2`
+  );
   return updated;
 }
 
@@ -1880,6 +1978,7 @@ if(!loadAdminLayout()){
 //  STATE
 // ════════════════════════════════
 let isLocked=true, currentView='chart', noMgrPanelVisible=false;
+let globalDividerX = 196;
 let editingId=null, selMgrId=null, selMgr2Id=null, moveSourceId=null, noMgrSel=false;
 let mgrFIdx=-1, mgrFIdx2=-1;
 let tvEditingId=null;
@@ -1937,7 +2036,7 @@ function applyLockState(){
   lt.classList.toggle('locked',isLocked);
   document.getElementById('lockIcon').textContent=isLocked?'🔒':'🔓';
   document.getElementById('lockLabel').textContent=isLocked?'Locked':'Unlocked';
-  ['btnAdd','btnAL','tvBtnAdd','dateBtn','btnExport','btnImport','tvBtnExport','btnSaveLayout','btnReset','btnGhPush'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=isLocked;});
+  ['btnAdd','btnAL','tvBtnAdd','dateBtn','btnExport','btnImport','tvBtnExport','btnSaveLayout','btnReset','btnGhPush','btnMultiSelect'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=isLocked;});
   if(currentView==='chart') render(); else renderTable();
 }
 
@@ -1987,7 +2086,7 @@ function isVisible(id){
 }
 function nodeClass(n){
   if(!n.mgr&&n.id!=='n1'&&n.type!=='gc')return 'nomgr';
-  if(n.dualMgr)return 'dual';
+  if(n.dualMgr && n.type !== 'gs')return 'dual';
   return n.type;
 }
 function render(){
@@ -1998,6 +2097,10 @@ function render(){
   let maxX=0,maxY=0;
   Object.values(nodes).forEach(n=>{maxX=Math.max(maxX,n.x+NODE_W+30);maxY=Math.max(maxY,n.y+NODE_H+50);});
   wrap.style.minWidth=maxX+'px'; wrap.style.minHeight=maxY+'px';
+  const divider = document.querySelector('.global-col-divider');
+  if (divider) {
+    divider.style.left = globalDividerX + 'px';
+  }
   let delay=0;
   Object.values(nodes).forEach(n=>{
     if(!isVisible(n.id))return;
@@ -2020,10 +2123,12 @@ function render(){
       <button class="nab add"  onclick="event.stopPropagation();quickAddChild('${n.id}')">+</button>
       ${hasC?`<button class="nab tog" onclick="event.stopPropagation();toggleCollapse('${n.id}')">${collapsed.has(n.id)?'▶':'▼'}</button>`:''}
     </div>`;
+    const isVip = n.id === 'n2' || n.id === 'n12';
+    const vipPrefix = isVip ? '👑 ' : '';
     el.innerHTML=`${actHtml}
       ${n.avatar ? `<div class="node-avatar" style="background-image: url('${n.avatar}')"></div>` : ''}
       <span class="role">${esc(n.role)}</span>
-      <span class="name">${esc(n.name)}</span>
+      <span class="name">${vipPrefix}${esc(n.name)}</span>
       ${countStr}
       ${n.dualMgr?'<span class="dual-badge">⇄ Dual</span>':''}
       ${(!n.mgr&&n.id!=='n1'&&n.type!=='gc')?'<span class="nomgr-badge">👤 No Mgr</span>':''}`;
@@ -2041,14 +2146,24 @@ function render(){
       el.addEventListener('touchstart',touchStart,{passive:false});
     }
     // Connection highlights on hover and click
-    el.addEventListener('mouseenter', () => {
+    el.addEventListener('mouseenter', e => {
       if (!pinnedNodeId) highlightConnection(n.id);
+      showTooltip(e, n);
+    });
+    el.addEventListener('mousemove', e => {
+      moveTooltip(e);
     });
     el.addEventListener('mouseleave', () => {
       if (!pinnedNodeId) clearHighlights();
+      hideTooltip();
     });
     el.addEventListener('click', e => {
       e.stopPropagation();
+      const isMulti = !isLocked && (isMultiSelectMode || e.ctrlKey || e.shiftKey || e.metaKey);
+      if (isMulti) {
+        toggleNodeSelection(n.id);
+        return;
+      }
       if (moveSourceId) {
         if (n.id !== moveSourceId) doMove(n.id);
         return;
@@ -2367,6 +2482,7 @@ function highlightConnection(nodeId) {
     }
   }
 }
+
 function drawHighlightPath(chId, parId, isDual = false) {
   const ch = nodes[chId];
   const par = nodes[parId];
@@ -2426,6 +2542,7 @@ function drawHighlightPath(chId, parId, isDual = false) {
     const ox = 8;
     const x2 = ch.x + NW/2 + ox, y2 = ch.y;
     const a = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    a.setAttribute('points', `${x2},${y2} dots`); // wait, we will use exact code here
     a.setAttribute('points', `${x2},${y2} ${x2-5},${y2-8} ${x2+5},${y2-8}`);
     a.setAttribute('class', 'dynamic-highlight highlight-arrow');
     svg.appendChild(a);
@@ -2446,16 +2563,78 @@ function drawHighlightPath(chId, parId, isDual = false) {
     }
   }
 }
+
 function clearHighlights(){
   highlightedNodeId = null;
   document.querySelectorAll('.highlight-child').forEach(el=>el.classList.remove('highlight-child'));
   document.querySelectorAll('.highlight-parent').forEach(el=>el.classList.remove('highlight-parent'));
   document.querySelectorAll('.dynamic-highlight').forEach(el=>el.remove());
 }
-document.addEventListener('click',()=>{
+document.addEventListener('click',(e)=>{
+  if (e.target.closest('.node') || e.target.closest('#btnMultiSelect') || e.target.closest('.selection-banner')) return;
   pinnedNodeId = null;
   clearHighlights();
+  clearSelection();
 });
+
+// ════════════════════════════════
+//  MULTI-SELECT STATE & HELPERS
+// ════════════════════════════════
+let isMultiSelectMode = false;
+const selectedNodes = new Set();
+
+function toggleMultiSelectMode() {
+  if (isLocked) return;
+  isMultiSelectMode = !isMultiSelectMode;
+  const btn = document.getElementById('btnMultiSelect');
+  if (btn) {
+    btn.classList.toggle('active', isMultiSelectMode);
+    if (isMultiSelectMode) {
+      btn.style.background = 'rgba(171, 71, 188, 0.2)';
+      btn.textContent = '✅ Multi-Select ON';
+    } else {
+      btn.style.background = 'transparent';
+      btn.textContent = '☑ Multi-Select';
+      clearSelection();
+    }
+  }
+}
+
+function clearSelection() {
+  selectedNodes.forEach(id => {
+    const el = document.getElementById('nd_' + id);
+    if (el) el.classList.remove('selected');
+  });
+  selectedNodes.clear();
+  updateSelectionBanner();
+}
+
+function toggleNodeSelection(id) {
+  const el = document.getElementById('nd_' + id);
+  if (!el) return;
+  
+  if (selectedNodes.has(id)) {
+    selectedNodes.delete(id);
+    el.classList.remove('selected');
+  } else {
+    selectedNodes.add(id);
+    el.classList.add('selected');
+  }
+  updateSelectionBanner();
+}
+
+function updateSelectionBanner() {
+  const banner = document.getElementById('selectionBanner');
+  const txt = document.getElementById('selectionBannerText');
+  if (!banner || !txt) return;
+  
+  if (selectedNodes.size > 0) {
+    banner.style.display = 'flex';
+    txt.textContent = `Selected: ${selectedNodes.size} employee${selectedNodes.size !== 1 ? 's' : ''}. Drag any to move them together.`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
 
 // ════════════════════════════════
 //  DRAG & DROP
@@ -2464,47 +2643,308 @@ let dragState=null;
 function dragStart(e){
   if(isLocked||e.target.closest('.nab,.node-collapse-btn'))return;
   e.preventDefault();
-  const el=e.currentTarget,id=el.dataset.id,rect=el.getBoundingClientRect();
-  dragState={id,el,offX:e.clientX-rect.left,offY:e.clientY-rect.top};
-  el.classList.add('dragging');
+  const el=e.currentTarget,id=el.dataset.id;
+  
+  // If the dragged node is not selected, and we aren't holding multi-select keys, clear selection
+  const isMulti = isMultiSelectMode || e.ctrlKey || e.shiftKey || e.metaKey;
+  if (!selectedNodes.has(id) && !isMulti) {
+    clearSelection();
+  }
+  
+  const draggedIds = selectedNodes.has(id) ? Array.from(selectedNodes) : [id];
+  const initialPositions = {};
+  draggedIds.forEach(nodeId => {
+    const node = nodes[nodeId];
+    if (node) {
+      initialPositions[nodeId] = { x: node.x, y: node.y };
+    }
+  });
+
+  dragState={
+    id,
+    el,
+    startX: e.clientX,
+    startY: e.clientY,
+    initialPositions,
+    draggedIds
+  };
+  
+  draggedIds.forEach(nodeId => {
+    const cell = document.getElementById('nd_' + nodeId);
+    if (cell) cell.classList.add('dragging');
+  });
+
   document.addEventListener('mousemove',onDrag);document.addEventListener('mouseup',dragEnd);
 }
 function onDrag(e){
   if(!dragState)return;
-  const wrap=document.getElementById('canvasWrap'),wr=wrap.getBoundingClientRect();
-  nodes[dragState.id].x=Math.max(0,e.clientX-wr.left-dragState.offX+wrap.scrollLeft);
-  nodes[dragState.id].y=Math.max(0,e.clientY-wr.top-dragState.offY+wrap.scrollTop);
-  dragState.el.style.left=nodes[dragState.id].x+'px';
-  dragState.el.style.top=nodes[dragState.id].y+'px';
+  const dx = e.clientX - dragState.startX;
+  const dy = e.clientY - dragState.startY;
+  
+  dragState.draggedIds.forEach(nodeId => {
+    const initPos = dragState.initialPositions[nodeId];
+    const node = nodes[nodeId];
+    const cell = document.getElementById('nd_' + nodeId);
+    if (initPos && node && cell) {
+      node.x = Math.max(0, initPos.x + dx);
+      node.y = Math.max(0, initPos.y + dy);
+      cell.style.left = node.x + 'px';
+      cell.style.top = node.y + 'px';
+    }
+  });
+  
   drawConnectors();
 }
 function dragEnd(){
   if(!dragState)return;
-  dragState.el.classList.remove('dragging');
+  dragState.draggedIds.forEach(nodeId => {
+    const cell = document.getElementById('nd_' + nodeId);
+    if (cell) cell.classList.remove('dragging');
+  });
+  saveAll();
   document.removeEventListener('mousemove',onDrag);document.removeEventListener('mouseup',dragEnd);
   dragState=null;
 }
 function touchStart(e){
   if(isLocked||e.target.closest('.nab,.node-collapse-btn'))return;
   e.preventDefault();
-  const t=e.touches[0],el=e.currentTarget,id=el.dataset.id,rect=el.getBoundingClientRect();
-  dragState={id,el,offX:t.clientX-rect.left,offY:t.clientY-rect.top};
-  el.classList.add('dragging');
+  const t=e.touches[0],el=e.currentTarget,id=el.dataset.id;
+  if (!selectedNodes.has(id)) {
+    clearSelection();
+  }
+  const draggedIds = selectedNodes.has(id) ? Array.from(selectedNodes) : [id];
+  const initialPositions = {};
+  draggedIds.forEach(nodeId => {
+    const node = nodes[nodeId];
+    if (node) {
+      initialPositions[nodeId] = { x: node.x, y: node.y };
+    }
+  });
+  dragState={
+    id,
+    el,
+    startX: t.clientX,
+    startY: t.clientY,
+    initialPositions,
+    draggedIds
+  };
+  draggedIds.forEach(nodeId => {
+    const cell = document.getElementById('nd_' + nodeId);
+    if (cell) cell.classList.add('dragging');
+  });
   document.addEventListener('touchmove',onTM,{passive:false});document.addEventListener('touchend',touchEnd);
 }
 function onTM(e){
   e.preventDefault();if(!dragState)return;
-  const t=e.touches[0],wrap=document.getElementById('canvasWrap'),wr=wrap.getBoundingClientRect();
-  nodes[dragState.id].x=Math.max(0,t.clientX-wr.left-dragState.offX+wrap.scrollLeft);
-  nodes[dragState.id].y=Math.max(0,t.clientY-wr.top-dragState.offY+wrap.scrollTop);
-  dragState.el.style.left=nodes[dragState.id].x+'px';
-  dragState.el.style.top=nodes[dragState.id].y+'px';
+  const t=e.touches[0];
+  const dx = t.clientX - dragState.startX;
+  const dy = t.clientY - dragState.startY;
+  
+  dragState.draggedIds.forEach(nodeId => {
+    const initPos = dragState.initialPositions[nodeId];
+    const node = nodes[nodeId];
+    const cell = document.getElementById('nd_' + nodeId);
+    if (initPos && node && cell) {
+      node.x = Math.max(0, initPos.x + dx);
+      node.y = Math.max(0, initPos.y + dy);
+      cell.style.left = node.x + 'px';
+      cell.style.top = node.y + 'px';
+    }
+  });
+
+
+
   drawConnectors();
 }
 function touchEnd(){
-  if(!dragState)return;dragState.el.classList.remove('dragging');
-  document.removeEventListener('touchmove',onTM);document.removeEventListener('touchend',touchEnd);dragState=null;
+  if(!dragState)return;
+  dragState.draggedIds.forEach(nodeId => {
+    const cell = document.getElementById('nd_' + nodeId);
+    if (cell) cell.classList.remove('dragging');
+  });
+  document.removeEventListener('touchmove',onTM);document.removeEventListener('touchend',touchEnd);
+  dragState=null;
+  saveAll();
 }
+
+// ════════════════════════════════
+//  DIVIDER DRAGGING
+// ════════════════════════════════
+let dividerDragState = null;
+
+function startDividerDrag(e) {
+  if (isLocked) return;
+  e.preventDefault();
+  e.stopPropagation();
+  
+  dividerDragState = {
+    startX: e.clientX,
+    startDividerX: globalDividerX,
+    oldPositions: Object.values(nodes).reduce((acc, n) => {
+      acc[n.id] = n.x;
+      return acc;
+    }, {})
+  };
+  
+  document.addEventListener('mousemove', onDividerDrag);
+  document.addEventListener('mouseup', endDividerDrag);
+}
+
+function onDividerDrag(e) {
+  if (!dividerDragState) return;
+  const dx = e.clientX - dividerDragState.startX;
+  const newX = Math.max(80, dividerDragState.startDividerX + dx);
+  
+  const div = document.querySelector('.global-col-divider');
+  if (div) {
+    div.style.left = newX + 'px';
+  }
+}
+
+function endDividerDrag(e) {
+  if (!dividerDragState) return;
+  
+  document.removeEventListener('mousemove', onDividerDrag);
+  document.removeEventListener('mouseup', endDividerDrag);
+  
+  const dx = e.clientX - dividerDragState.startX;
+  const newX = Math.max(80, dividerDragState.startDividerX + dx);
+  const actualDx = newX - globalDividerX;
+  
+  Object.values(nodes).forEach(n => {
+    if (dividerDragState.oldPositions[n.id] >= globalDividerX) {
+      n.x = Math.max(newX + 10, n.x + actualDx);
+    }
+  });
+  
+  globalDividerX = newX;
+  dividerDragState = null;
+  
+  saveAll();
+  render();
+}
+
+function startDividerTouch(e) {
+  if (isLocked) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const t = e.touches[0];
+  
+  dividerDragState = {
+    startX: t.clientX,
+    startDividerX: globalDividerX,
+    oldPositions: Object.values(nodes).reduce((acc, n) => {
+      acc[n.id] = n.x;
+      return acc;
+    }, {})
+  };
+  
+  document.addEventListener('touchmove', onDividerTouch, { passive: false });
+  document.addEventListener('touchend', endDividerTouch);
+}
+
+function onDividerTouch(e) {
+  if (!dividerDragState) return;
+  const t = e.touches[0];
+  const dx = t.clientX - dividerDragState.startX;
+  const newX = Math.max(80, dividerDragState.startDividerX + dx);
+  
+  const div = document.querySelector('.global-col-divider');
+  if (div) {
+    div.style.left = newX + 'px';
+  }
+}
+
+function endDividerTouch(e) {
+  if (!dividerDragState) return;
+  
+  document.removeEventListener('touchmove', onDividerTouch);
+  document.removeEventListener('touchend', endDividerTouch);
+  
+  const t = e.changedTouches ? e.changedTouches[0] : null;
+  const finalX = t ? t.clientX : dividerDragState.startX;
+  const dx = finalX - dividerDragState.startX;
+  const newX = Math.max(80, dividerDragState.startDividerX + dx);
+  const actualDx = newX - globalDividerX;
+  
+  Object.values(nodes).forEach(n => {
+    if (dividerDragState.oldPositions[n.id] >= globalDividerX) {
+      n.x = Math.max(newX + 10, n.x + actualDx);
+    }
+  });
+  
+  globalDividerX = newX;
+  dividerDragState = null;
+  
+  saveAll();
+  render();
+}
+
+// ════════════════════════════════
+//  INFO TOOLTIPS
+// ════════════════════════════════
+function showTooltip(e, n) {
+  const tooltip = document.getElementById('hsTooltip');
+  if (!tooltip) return;
+  
+  const repCount = totalDescendants(n.id);
+  const mgr = n.mgr ? nodes[n.mgr] : null;
+  
+  let msg = `<strong>${esc(n.name)}</strong> has <strong>${repCount}</strong> report${repCount !== 1 ? 's' : ''}`;
+  if (mgr) {
+    msg += ` and his manager is <strong>${esc(mgr.name)}</strong>`;
+  } else {
+    msg += ` and has no manager`;
+  }
+  if (n.dualMgr && nodes[n.dualMgr]) {
+    msg += `, and 2nd manager is <strong>${esc(nodes[n.dualMgr].name)}</strong>`;
+  }
+  msg += '.';
+  
+  tooltip.innerHTML = msg;
+  tooltip.style.display = 'block';
+  tooltip.offsetHeight; // force reflow
+  tooltip.classList.add('show');
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const tooltip = document.getElementById('hsTooltip');
+  if (!tooltip) return;
+  
+  let x = e.clientX + 15;
+  let y = e.clientY + 15;
+  
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  const sw = window.innerWidth;
+  const sh = window.innerHeight;
+  
+  if (x + tw > sw) {
+    x = e.clientX - tw - 15;
+  }
+  if (y + th > sh) {
+    y = e.clientY - th - 15;
+  }
+  
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+let tooltipHideTimeout = null;
+function hideTooltip() {
+  const tooltip = document.getElementById('hsTooltip');
+  if (!tooltip) return;
+  tooltip.classList.remove('show');
+  clearTimeout(tooltipHideTimeout);
+  tooltipHideTimeout = setTimeout(() => {
+    if (!tooltip.classList.contains('show')) {
+      tooltip.style.display = 'none';
+    }
+  }, 150);
+}
+
+
 
 // ════════════════════════════════
 //  CONNECTOR ORIGIN DOT DRAG
@@ -3095,6 +3535,11 @@ function init(){
   marker.style.display = 'none';
   document.body.appendChild(marker);
   applyLockState(); // apply locked UI before first render
+  const divider = document.querySelector('.global-col-divider');
+  if (divider) {
+    divider.addEventListener('mousedown', startDividerDrag);
+    divider.addEventListener('touchstart', startDividerTouch, { passive: false });
+  }
   render();
   updateCounts(); // ensure counts display on initial load
 }
