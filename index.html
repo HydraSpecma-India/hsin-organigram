@@ -1137,7 +1137,8 @@ const ADMIN_NODES = {
     "mgr": null,
     "line": "dotted",
     "email": "",
-    "avatar": "image/Christian Evers.jpg"
+    "avatar": "image/Christian Evers.jpg",
+    "busOffsetY": 3
   },
   "n7": {
     "id": "n7",
@@ -1186,7 +1187,8 @@ const ADMIN_NODES = {
     "mgr": "n2",
     "line": "direct",
     "email": "",
-    "avatar": "image/Babu Parthasarathy.jpg"
+    "avatar": "image/Babu Parthasarathy.jpg",
+    "busOffsetY": 60
   },
   "n3": {
     "id": "n3",
@@ -1227,7 +1229,8 @@ const ADMIN_NODES = {
     "mgr": "n12",
     "line": "direct",
     "email": "sureshkumar.paramasivam@hydraspecma.com",
-    "avatar": "image/Sureshkumar Paramasivam.jpg"
+    "avatar": "image/Sureshkumar Paramasivam.jpg",
+    "lineOffsetX": 4
   },
   "n22": {
     "id": "n22",
@@ -1251,7 +1254,7 @@ const ADMIN_NODES = {
     "y": 729.0000686645508,
     "mgr": "n2",
     "line": "dotted",
-    "lineOffsetX": -9,
+    "lineOffsetX": -8,
     "email": "",
     "avatar": "image/Kasper Nissen.jpg"
   },
@@ -1266,7 +1269,8 @@ const ADMIN_NODES = {
     "line": "direct",
     "email": "Kumaran.Gopalan@hydraspecma.com",
     "avatar": "image/Kumaran Gopalan.jpg",
-    "lineOffsetX": 0
+    "lineOffsetX": 0,
+    "busOffsetY": 24
   },
   "n60": {
     "id": "n60",
@@ -1336,13 +1340,14 @@ const ADMIN_NODES = {
     "role": "Technical Engineer",
     "name": "Anand Raj Gopalan",
     "type": "gs",
-    "x": 290.0000305175781,
-    "y": 900.0000686645508,
+    "x": 279.0000305175781,
+    "y": 908.0000686645508,
     "mgr": "n12",
-    "line": "dotted",
+    "line": "direct",
     "dualMgr": "n13",
     "email": "anand.raj.gopalan@hydraspecma.com",
-    "lineOffsetX": 0
+    "lineOffsetX": -1,
+    "dualLine": "dotted"
   },
   "n15": {
     "id": "n15",
@@ -1362,14 +1367,15 @@ const ADMIN_NODES = {
     "role": "Configuration Lead – PDM",
     "name": "Dharani Kumar Mohanan",
     "type": "gs",
-    "x": 293.00001525878906,
-    "y": 572.0000076293945,
+    "x": 288.00001525878906,
+    "y": 574.0000076293945,
     "mgr": "n12",
     "line": "direct",
     "dualMgr": "n15",
     "dualLine": "dotted",
     "email": "dharani.kumar.mohanan@hydraspecma.com",
-    "avatar": "image/Dharani Kumar Mohanan.jpg"
+    "avatar": "image/Dharani Kumar Mohanan.jpg",
+    "lineOffsetX": -9
   },
   "n17": {
     "id": "n17",
@@ -1409,7 +1415,8 @@ const ADMIN_NODES = {
     "dualMgr": "n17",
     "dualLine": "dotted",
     "email": "vivekraj.kaliyaperumal@hydraspecma.com",
-    "avatar": "image/Vivekraj Kaliyaperumal.jpg"
+    "avatar": "image/Vivekraj Kaliyaperumal.jpg",
+    "lineOffsetX": -8
   },
   "n20": {
     "id": "n20",
@@ -1423,19 +1430,21 @@ const ADMIN_NODES = {
     "dualMgr": "n19",
     "email": "balachandar.rajaram@hydraspecma.com",
     "dualLine": "dotted",
-    "avatar": "image/Balachandar Rajaram.jpg"
+    "avatar": "image/Balachandar Rajaram.jpg",
+    "lineOffsetX": -7
   },
   "n24": {
     "id": "n24",
     "role": "Warehouse Engineer",
     "name": "Perumal Parthiban",
     "type": "wc",
-    "x": 1606.9686279296875,
+    "x": 1594.9686279296875,
     "y": 391.9749755859375,
     "mgr": "n23",
     "line": "direct",
     "email": "perumal.parthiban@hydraspecma.com",
-    "lineOffsetX": 0
+    "lineOffsetX": 0,
+    "busOffsetY": 100
   },
   "n25": {
     "id": "n25",
@@ -1446,7 +1455,8 @@ const ADMIN_NODES = {
     "y": 390,
     "mgr": "n23",
     "line": "direct",
-    "email": "arun.bharathwaaj.ramani@hydraspecma.com"
+    "email": "arun.bharathwaaj.ramani@hydraspecma.com",
+    "busOffsetY": 23
   },
   "n34": {
     "id": "n34",
@@ -1454,7 +1464,7 @@ const ADMIN_NODES = {
     "name": "Rajesh Kumar",
     "type": "wc",
     "x": 1984.981201171875,
-    "y": 377.98748779296875,
+    "y": 393.98748779296875,
     "mgr": "n23",
     "line": "direct"
   },
@@ -1468,7 +1478,9 @@ const ADMIN_NODES = {
     "mgr": "n23",
     "line": "direct",
     "email": "",
-    "avatar": "image/Mohan Srinivasan.jpg"
+    "avatar": "image/Mohan Srinivasan.jpg",
+    "busOffsetY": 8,
+    "lineOffsetX": 0
   },
   "n26": {
     "id": "n26",
@@ -1486,22 +1498,22 @@ const ADMIN_NODES = {
     "role": "Fork Lift Operator",
     "name": "Contract Labour",
     "type": "cl",
-    "x": 1291,
-    "y": 980,
-    "mgr": "n25",
+    "x": 1216,
+    "y": 881,
+    "mgr": "n24",
     "line": "direct",
-    "lineOffsetX": 0
+    "lineOffsetX": -241
   },
   "n30": {
     "id": "n30",
     "role": "Senior Quality Engineer",
     "name": "Aswinraja Mariappan",
     "type": "wc",
-    "x": 1303,
-    "y": 523,
+    "x": 1251,
+    "y": 516,
     "mgr": "n25",
     "line": "direct",
-    "lineOffsetX": 0,
+    "lineOffsetX": 137,
     "email": "aswinraja.mariappan@hydraspecma.com"
   },
   "n27": {
@@ -1524,135 +1536,146 @@ const ADMIN_NODES = {
     "role": "Junior Technician",
     "name": "Sivagami",
     "type": "bc",
-    "x": 1119.9833984375,
-    "y": 522.9833526611328,
-    "mgr": "n26",
-    "line": "direct"
+    "x": 1591.9833984375,
+    "y": 517.9833526611328,
+    "mgr": "n24",
+    "line": "direct",
+    "lineOffsetX": 5
   },
   "n31": {
     "id": "n31",
     "role": "Quality Engineer",
     "name": "Venkatesan Annamalai",
     "type": "bc",
-    "x": 1306,
-    "y": 602,
+    "x": 1275,
+    "y": 611,
     "mgr": "n25",
     "line": "direct",
-    "lineOffsetX": -2,
+    "lineOffsetX": 88,
     "email": "",
-    "avatar": "image/Venkatesan Annamalai.jpg"
+    "avatar": "image/Venkatesan Annamalai.jpg",
+    "busOffsetY": -100
   },
   "n33": {
     "id": "n33",
     "role": "Fork Lift Operator",
     "name": "Contract QL",
     "type": "cl",
-    "x": 769,
-    "y": 981,
-    "mgr": "n25",
+    "x": 693,
+    "y": 879,
+    "mgr": "n24",
     "line": "direct",
-    "lineOffsetX": -1
+    "lineOffsetX": 282
   },
   "n32": {
     "id": "n32",
     "role": "Jr Quality Engineer",
     "name": "Srinivasan",
     "type": "wc",
-    "x": 1472,
+    "x": 1423,
     "y": 519,
     "mgr": "n25",
     "line": "direct",
-    "lineOffsetX": 0
+    "lineOffsetX": -38
   },
   "n35": {
     "id": "n35",
     "role": "Prod Eng",
     "name": "Yuvaraj Gopala Krishnan",
     "type": "wc",
-    "x": 1976,
-    "y": 492,
+    "x": 1932,
+    "y": 488,
     "mgr": "n46",
     "line": "direct",
     "email": "",
-    "avatar": "image/Yuvaraj Gopala Krishnan.jpg"
+    "avatar": "image/Yuvaraj Gopala Krishnan.jpg",
+    "busOffsetY": 6,
+    "lineOffsetX": -128
   },
   "n36": {
     "id": "n36",
     "role": "Senior Technician",
     "name": "Elangovan",
     "type": "bc",
-    "x": 1992,
-    "y": 620,
+    "x": 1922,
+    "y": 641,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": 7
   },
   "n37": {
     "id": "n37",
     "role": "Prod Tech",
     "name": "Tamil Selvan",
     "type": "bc",
-    "x": 1996,
-    "y": 708,
+    "x": 2032,
+    "y": 720,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -99
   },
   "n38": {
     "id": "n38",
     "role": "Prod Tech",
     "name": "Vignesh",
     "type": "bc",
-    "x": 1996,
-    "y": 792,
+    "x": 1855,
+    "y": 721,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": 76
   },
   "n39": {
     "id": "n39",
     "role": "Junior Technician",
     "name": "Mohammed Rafiq",
     "type": "bc",
-    "x": 2001,
-    "y": 886,
+    "x": 1947,
+    "y": 791,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -13
   },
   "n40": {
     "id": "n40",
     "role": "Junior Technician",
     "name": "Ms. Selvi",
     "type": "bc",
-    "x": 2009,
-    "y": 965,
+    "x": 2108,
+    "y": 786,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -174
   },
   "n41": {
     "id": "n41",
     "role": "Diploma Trainee",
     "name": "Prasanth",
     "type": "bc",
-    "x": 2004,
-    "y": 1052,
+    "x": 2121,
+    "y": 874,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -187
   },
   "n42": {
     "id": "n42",
     "role": "Contract Labour",
     "name": "Sathishkumar",
     "type": "cl",
-    "x": 941,
-    "y": 985,
+    "x": 866,
+    "y": 881,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": 109
   },
   "n43": {
     "id": "n43",
     "role": "Contract Labour",
     "name": "Vinoth",
     "type": "cl",
-    "x": 1052,
-    "y": 892,
+    "x": 976,
+    "y": 789,
     "mgr": "n35",
     "line": "direct"
   },
@@ -1661,161 +1684,166 @@ const ADMIN_NODES = {
     "role": "Contract Labour",
     "name": "Karusiyappan",
     "type": "cl",
-    "x": 1112,
-    "y": 984,
+    "x": 1036,
+    "y": 881,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -60
   },
   "n45": {
     "id": "n45",
     "role": "Contract Labour",
     "name": "Anandhan",
     "type": "cl",
-    "x": 1221,
-    "y": 887,
+    "x": 1145,
+    "y": 792,
     "mgr": "n35",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": -171
   },
   "n47": {
     "id": "n47",
     "role": "Prod & Maint Incharge",
     "name": "Shivashankar",
     "type": "wc",
-    "x": 1793,
-    "y": 512,
+    "x": 1750,
+    "y": 511,
     "mgr": "n46",
-    "line": "direct"
+    "line": "direct",
+    "busOffsetY": -9,
+    "lineOffsetX": 52
   },
   "n48": {
     "id": "n48",
     "role": "Senior Technician",
     "name": "Prakash",
     "type": "bc",
-    "x": 1646,
-    "y": 619,
+    "x": 1562,
+    "y": 651,
     "mgr": "n47",
-    "line": "direct"
+    "line": "direct",
+    "lineOffsetX": 183
   },
   "n49": {
     "id": "n49",
     "role": "Senior Technician",
     "name": "Kumareson",
     "type": "bc",
-    "x": 1815,
-    "y": 617,
+    "x": 1741,
+    "y": 645,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -9
+    "lineOffsetX": 4
   },
   "n50": {
     "id": "n50",
     "role": "Technician",
     "name": "A Sathish",
     "type": "bc",
-    "x": 1819,
-    "y": 705,
+    "x": 1680,
+    "y": 723,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -10
+    "lineOffsetX": 65
   },
   "n51": {
     "id": "n51",
     "role": "Maint Technician",
     "name": "Suresh Umapathy",
     "type": "bc",
-    "x": 1823,
+    "x": 1607,
     "y": 796,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -11
+    "lineOffsetX": 139
   },
   "n52": {
     "id": "n52",
     "role": "Technician",
     "name": "Sivalinca",
     "type": "bc",
-    "x": 1647.9999389648438,
-    "y": 710.9936828613281,
+    "x": 1501.9999389648438,
+    "y": 724.9936828613281,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -3
+    "lineOffsetX": 242
   },
   "n53": {
     "id": "n53",
     "role": "Junior Technician",
     "name": "Nanthakumar",
     "type": "bc",
-    "x": 1649.981201171875,
-    "y": 888.9874572753906,
+    "x": 1774.981201171875,
+    "y": 791.9874572753906,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -1
+    "lineOffsetX": -31
   },
   "n54": {
     "id": "n54",
     "role": "Junior Technician",
     "name": "Ms. Deepa",
     "type": "bc",
-    "x": 1653.9999389648438,
-    "y": 800.9936828613281,
+    "x": 1442.9999389648438,
+    "y": 795.9936828613281,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -5
+    "lineOffsetX": 300
   },
   "n55": {
     "id": "n55",
     "role": "Diploma Trainee",
     "name": "Rajkumar",
     "type": "bc",
-    "x": 1654,
-    "y": 1047,
+    "x": 1952,
+    "y": 874,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -4
+    "lineOffsetX": -206
   },
   "n56": {
     "id": "n56",
     "role": "Diploma Trainee",
     "name": "Hemanth Kumar",
     "type": "bc",
-    "x": 1650,
-    "y": 966,
+    "x": 1444,
+    "y": 872,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -1
+    "lineOffsetX": 300
   },
   "n57": {
     "id": "n57",
     "role": "Diploma Trainee",
     "name": "Annaswami",
     "type": "bc",
-    "x": 1823,
-    "y": 970,
+    "x": 1781,
+    "y": 874,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -12
+    "lineOffsetX": -35
   },
   "n58": {
     "id": "n58",
     "role": "Diploma Trainee",
     "name": "V. Babu",
     "type": "bc",
-    "x": 1818.9937133789062,
-    "y": 887.9936828613281,
+    "x": 1614.9937133789062,
+    "y": 871.9936828613281,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -7
+    "lineOffsetX": 131
   },
   "n59": {
     "id": "n59",
     "role": "Contract Labour",
     "name": "Raju",
     "type": "cl",
-    "x": 873,
-    "y": 896,
+    "x": 795,
+    "y": 791,
     "mgr": "n47",
     "line": "direct",
-    "lineOffsetX": -30
+    "lineOffsetX": 179
   },
   "n61": {
     "id": "n61",
@@ -1857,7 +1885,7 @@ const ADMIN_NODES = {
     "name": "Nareshkumar Elumalai",
     "email": "nareshkumar.elumalai@hydraspecma.com",
     "type": "gs",
-    "x": 285.00000762939453,
+    "x": 279.00000762939453,
     "y": 805.0000686645508,
     "mgr": "n12",
     "line": "direct",
@@ -1874,7 +1902,7 @@ const ADMIN_NODES = {
     "mgr": "n12",
     "line": "direct",
     "dualMgr": "n13",
-    "lineOffsetX": 3
+    "lineOffsetX": -6
   },
   "n504": {
     "id": "n504",
